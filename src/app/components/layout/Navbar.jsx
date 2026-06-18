@@ -47,8 +47,11 @@ const Navbar = () => {
               <Link href="/search" className="text-gray-700 font-medium hover:text-red-800 transition">
                 Search Donors
               </Link>
-              <Link href="/login" className="bg-white border border-gray-300 text-gray-800 px-6 py-2 rounded-full font-medium hover:bg-gray-50 transition shadow-sm">
+              <Link href="/auth/login" className="text-gray-700 font-medium hover:text-red-800 transition">
                 Login
+              </Link>
+              <Link href="/auth/signup" className="bg-[#991b1b] text-white px-6 py-2 rounded-full font-medium hover:bg-red-900 transition shadow-md">
+                Sign Up
               </Link>
             </>
           ) : (
@@ -115,11 +118,18 @@ const Navbar = () => {
                   Search Donors
                 </Link>
                 <Link
-                  href="/login"
-                  className="bg-red-800 text-white px-6 py-3 rounded-full font-medium text-center shadow-lg active:scale-95 transition"
+                  href="/auth/login"
+                  className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50 text-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="bg-red-800 text-white px-6 py-3 rounded-full font-medium text-center shadow-lg active:scale-95 transition"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sign Up
                 </Link>
               </>
             ) : (

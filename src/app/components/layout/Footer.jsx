@@ -8,13 +8,13 @@ const Footer = () => {
         <footer className="bg-gray-950 text-gray-300 py-16 px-6 mt-auto font-sans">
             <div className="container mx-auto max-w-6xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-                    
+
                     <div className="col-span-1 lg:col-span-1">
                         <Link href="/" className="text-white text-2xl font-bold tracking-tighter block mb-6">
                             Erythro<span className="text-red-700">Share</span>
                         </Link>
                         <p className="text-gray-400 text-sm leading-relaxed">
-                            Connecting life-savers with those in need. ErythroShare is a dedicated 
+                            Connecting life-savers with those in need. ErythroShare is a dedicated
                             platform for seamless blood donation and requests.
                         </p>
                     </div>
