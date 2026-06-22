@@ -16,8 +16,8 @@ export const metadata = {
   description: "ErythroShare is a platform for sharing blood",
 };
 
-import Navbar from "./components/layout/Navbar";
-import Footer from "./components/layout/Footer";
+import Navbar from "./components/mainLayout/Navbar";
+import Footer from "./components/mainLayout/Footer";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

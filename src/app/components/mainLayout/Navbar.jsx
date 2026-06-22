@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { HiMenu, HiX } from "react-icons/hi";
 import { useSession, authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const Navbar = () => {
   const router = useRouter();
@@ -11,6 +11,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { data: session } = useSession();
+  // console.log(session)
   const isLoggedIn = !!session;
 
   const handleLogout = async () => {
@@ -29,6 +30,8 @@ const Navbar = () => {
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  const pathname = usePathname()
 
   return (
     <nav className="bg-[#f5f5f5] border-b border-gray-200 py-4 px-6 md:px-8 sticky top-0 z-50 font-sans">
@@ -90,11 +93,11 @@ const Navbar = () => {
                 {isOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50">
                     <Link
-                      href="/dashboard"
+                      href={pathname.includes('dashboard') ? "/" : "/dashboard"}
                       className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800"
                       onClick={() => setIsOpen(false)}
                     >
-                      Dashboard
+                      {pathname.includes('dashboard') ? "Homepage" : "Dashboard"}
                     </Link>
                     <button
                       onClick={handleLogout}
