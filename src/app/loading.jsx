@@ -6,7 +6,7 @@ export default function Loading() {
             <div className="relative flex flex-col items-center">
                 {/* Outer Ring */}
                 <div className="size-20 animate-spin rounded-full border-4 border-red-100 border-t-red-600"></div>
-                
+
                 {/* Pulsing Heart / Logo Placeholder */}
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="size-10 animate-pulse rounded-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>

@@ -1,14 +1,16 @@
 "use client"
 
-import { Bars, Bell, Envelope, Gear, House, Magnifier, Person } from "@gravity-ui/icons";
+import { Bars, Bell, Envelope, Gear, House, Magnifier, Person, Xmark } from "@gravity-ui/icons";
 import { Button, Drawer } from "@heroui/react";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
 export function Sidebar() {
     const { data: session } = useSession();
     const role = session?.user?.role || "donor";
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
     const menuData = {
@@ -38,17 +40,26 @@ export function Sidebar() {
             <div className="mb-6 px-2 text-xl font-bold text-[#991b1b]">
                 ErythroShare
             </div>
-            {currentNavItems.map((item) => (
-                <Link
-                    key={item.label}
-                    href={item.link}
-                    className="group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground/80 transition-all hover:bg-neutral-100 hover:text-[#991b1b]"
-                    onClick={() => setIsOpen(false)}
-                >
-                    <item.icon className="size-5 text-muted transition-colors group-hover:text-[#991b1b]" />
-                    {item.label}
-                </Link>
-            ))}
+            {currentNavItems.map((item) => {
+                const isActive = pathname === item.link;
+                return (
+                    <Link
+                        key={item.label}
+                        href={item.link}
+                        className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all hover:bg-red-50 hover:text-[#991b1b] ${
+                            isActive 
+                            ? "bg-red-50 text-[#991b1b]" 
+                            : "text-foreground/80 hover:bg-neutral-100"
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                    >
+                        <item.icon className={`size-5 transition-colors ${
+                            isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
+                        }`} />
+                        {item.label}
+                    </Link>
+                );
+            })}
         </nav>
     );
 
@@ -69,10 +80,35 @@ export function Sidebar() {
 
             <Drawer isOpen={isOpen} onOpenChange={setIsOpen}>
                 <Drawer.Backdrop />
-                <Drawer.Content placement="left" className="bg-white/95 backdrop-blur-xl w-[280px]">
-                    <div className="h-full pt-8">
-                        {navLinks}
-                    </div>
+                <Drawer.Content placement="left" className="bg-white/95 backdrop-blur-xl w-[280px] p-0">
+                    <Drawer.Dialog className="outline-none h-full">
+                        <div className="flex flex-col h-full">
+                            {/* Close Button Area */}
+                            <div className="flex items-center justify-between p-4 border-b border-neutral-100">
+                                <div className="text-xl font-bold text-[#991b1b]">
+                                    ErythroShare
+                                </div>
+                                <Button
+                                    isIconOnly
+                                    className="rounded-full bg-neutral-100/50 hover:bg-neutral-100 h-9 w-9 min-w-0"
+                                    variant="light"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    <Xmark className="size-5 text-neutral-600" />
+                                </Button>
+                            </div>
+
+                            {/* Navigation Links */}
+                            <div className="flex-1 overflow-y-auto pt-2">
+                                {/* We wrap currentNavItems mapping here directly to exclude the extra logo if desired, 
+                                    but since navLinks is defined above, we can reuse it if we remove the logo from it 
+                                    or just use it as is. Let's reuse navLinks but wrap it to hide the extra title in drawer. */}
+                                <div className="[&_.mb-6]:hidden">
+                                    {navLinks}
+                                </div>
+                            </div>
+                        </div>
+                    </Drawer.Dialog>
                 </Drawer.Content>
             </Drawer>
         </div>

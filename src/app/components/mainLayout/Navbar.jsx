@@ -56,16 +56,25 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          <Link href="/donation-requests" className="text-gray-700 font-medium hover:text-red-800 transition">
+          <Link 
+            href="/donation-requests" 
+            className={`${pathname === "/donation-requests" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
+          >
             Donation Requests
           </Link>
 
           {!isLoggedIn ? (
             <>
-              <Link href="/search" className="text-gray-700 font-medium hover:text-red-800 transition">
+              <Link 
+                href="/search" 
+                className={`${pathname === "/search" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
+              >
                 Search Donors
               </Link>
-              <Link href="/auth/login" className="text-gray-700 font-medium hover:text-red-800 transition">
+              <Link 
+                href="/auth/login" 
+                className={`${pathname === "/auth/login" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
+              >
                 Login
               </Link>
               <Link href="/auth/signup" className="bg-[#991b1b] text-white px-6 py-2 rounded-full font-medium hover:bg-red-900 transition shadow-md">
@@ -74,7 +83,10 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link href="/funding" className="text-gray-700 font-medium hover:text-red-800 transition">
+              <Link 
+                href="/funding" 
+                className={`${pathname === "/funding" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
+              >
                 Funding Links
               </Link>
 
@@ -118,7 +130,7 @@ const Navbar = () => {
           <div className="flex flex-col gap-4">
             <Link
               href="/donation-requests"
-              className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50"
+              className={`${pathname === "/donation-requests" ? "text-red-800 bg-red-50" : "text-gray-700"} font-bold p-2 rounded-lg hover:bg-gray-50`}
               onClick={() => setIsMenuOpen(false)}
             >
               Donation Requests
@@ -127,14 +139,14 @@ const Navbar = () => {
               <>
                 <Link
                   href="/search"
-                  className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50"
+                  className={`${pathname === "/search" ? "text-red-800 bg-red-50" : "text-gray-700"} font-bold p-2 rounded-lg hover:bg-gray-50`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Search Donors
                 </Link>
                 <Link
                   href="/auth/login"
-                  className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50 text-center"
+                  className={`${pathname === "/auth/login" ? "text-red-800 bg-red-50" : "text-gray-700"} font-bold p-2 rounded-lg hover:bg-gray-50 text-center`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
@@ -151,14 +163,14 @@ const Navbar = () => {
               <>
                 <Link
                   href="/funding"
-                  className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50"
+                  className={`${pathname === "/funding" ? "text-red-800 bg-red-50" : "text-gray-700"} font-bold p-2 rounded-lg hover:bg-gray-50`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Funding Links
                 </Link>
                 <Link
                   href="/dashboard"
-                  className="text-gray-700 font-medium hover:text-red-800 p-2 rounded-lg hover:bg-gray-50"
+                  className={`${pathname === "/dashboard" ? "text-red-800 bg-red-50" : "text-gray-700"} font-bold p-2 rounded-lg hover:bg-gray-50`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard

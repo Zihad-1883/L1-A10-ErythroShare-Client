@@ -1,11 +1,49 @@
 import { useSession } from "@/lib/auth-client"
-import React from "react"
-import { Person, Bars, Bell } from "@gravity-ui/icons";
+import React, { useEffect, useState } from "react"
+import { Person, Bars, Bell, Pencil, TrashBin, Eye, Clock, MapPin } from "@gravity-ui/icons";
+import { serverQuery } from "@/lib/actions/server";
+import {
+    Button,
+    Chip,
+    Tooltip,
+    TooltipTrigger,
+    TooltipContent
+} from "@heroui/react";
+import Link from "next/link";
 
 export default function DashboardHomePageData() {
-
     const { data: session } = useSession();
-    const role = session?.user?.role
+    const role = session?.user?.role;
+    const [requests, setRequests] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRecentRequests = async () => {
+            if (role === "donor" && session?.user?.email) {
+                try {
+                    const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
+                    setRequests(Array.isArray(data) ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3) : []);
+                } catch (error) {
+                    console.error("Error fetching recent requests:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setIsLoading(false);
+            }
+        };
+        fetchRecentRequests();
+    }, [role, session]);
+
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case "pending": return "warning";
+            case "inprogress": return "primary";
+            case "done": return "success";
+            case "canceled": return "danger";
+            default: return "default";
+        }
+    };
 
     const WelcomeSection = (
         <div className="relative overflow-hidden rounded-[2.5rem] bg-[#991b1b] p-8 shadow-2xl shadow-red-200 md:p-12">
@@ -25,65 +63,183 @@ export default function DashboardHomePageData() {
 
     const AdminStats = (
         <div className="grid gap-6 md:grid-cols-3">
-            <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group">
-                <div className="bg-neutral-50 p-5 rounded-3xl text-[#991b1b] mb-4 group-hover:scale-110 transition-transform">
-                    <Person className="size-8" />
+            {[
+                { icon: Person, label: "Total Donors", value: "0" },
+                { icon: Bars, label: "Total Funding", value: "$0" },
+                { icon: Bell, label: "Total Requests", value: "0" }
+            ].map((stat, idx) => (
+                <div key={idx} className="rounded-[2.5rem] border border-neutral-100 bg-white p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group">
+                    <div className="bg-neutral-50 p-5 rounded-3xl text-[#991b1b] mb-4 group-hover:scale-110 transition-transform">
+                        <stat.icon className="size-8" />
+                    </div>
+                    <div className="text-4xl font-black text-neutral-800">{stat.value}</div>
+                    <div className="mt-1 text-xs font-bold text-neutral-400 uppercase tracking-widest">{stat.label}</div>
                 </div>
-                <div className="text-4xl font-black text-neutral-800">0</div>
-                <div className="mt-1 text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Donors</div>
-            </div>
-            <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group">
-                <div className="bg-neutral-50 p-5 rounded-3xl text-[#991b1b] mb-4 group-hover:scale-110 transition-transform">
-                    <Bars className="size-8" />
-                </div>
-                <div className="text-4xl font-black text-neutral-800">$0</div>
-                <div className="mt-1 text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Funding</div>
-            </div>
-            <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group">
-                <div className="bg-neutral-50 p-5 rounded-3xl text-[#991b1b] mb-4 group-hover:scale-110 transition-transform">
-                    <Bell className="size-8" />
-                </div>
-                <div className="text-4xl font-black text-neutral-800">0</div>
-                <div className="mt-1 text-xs font-bold text-neutral-400 uppercase tracking-widest">Total Requests</div>
-            </div>
+            ))}
         </div>
     );
 
-    const DonorRecentRequests = (
+    const DonorRecentRequests = requests.length > 0 && (
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
-                <h2 className="text-2xl font-bold text-neutral-800">Recent Donation Requests</h2>
-                <button className="text-sm font-bold text-[#991b1b] hover:underline">View All</button>
+                <div className="flex items-center gap-3">
+                    <div className="bg-red-50 p-2 rounded-xl text-red-600">
+                        <Clock className="size-5" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-neutral-800 uppercase tracking-tight">Recent Donation Requests</h2>
+                </div>
+                <Link href="/dashboard/my-donation-requests" className="text-sm font-bold text-[#991b1b] hover:underline flex items-center gap-1">
+                    View All <Bars className="size-4" />
+                </Link>
             </div>
+
             <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-4 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-xs text-neutral-400 uppercase tracking-widest border-b border-neutral-50">
-                                <th className="px-6 py-4 font-bold">Recipient</th>
-                                <th className="px-6 py-4 font-bold">Location</th>
-                                <th className="px-6 py-4 font-bold">Date/Time</th>
-                                <th className="px-6 py-4 font-bold">Status</th>
+                            <tr className="text-xs text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 px-6">
+                                <th className="px-6 py-5 font-black whitespace-nowrap">Recipient</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap">Location</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap text-center">Info</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap">Status</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-50">
-                            <tr>
-                                <td colSpan="4" className="px-6 py-20 text-center text-neutral-400 font-medium italic">
-                                    You haven&apos;t made any donation requests yet.
-                                </td>
-                            </tr>
+                            {requests.map((req) => (
+                                <tr key={req._id} className="group hover:bg-neutral-50 transition-colors">
+                                    <td className="px-6 py-6 font-bold text-neutral-900">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-full bg-red-50 flex items-center justify-center text-[#991b1b] font-bold text-xs">
+                                                {req.bloodGroup}
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-black whitespace-nowrap">{req.recipientName}</div>
+                                                <div className="text-[10px] text-neutral-400 uppercase tracking-widest">{req.bloodGroup} Group</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-6">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
+                                                <MapPin className="size-3 text-red-400" />
+                                                {req.recipientDistrict}, {req.recipientUpazila}
+                                            </div>
+                                            <div className="text-[10px] text-neutral-500 flex items-center gap-2">
+                                                <Clock className="size-3" />
+                                                {req.donationDate} at {req.donationTime}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-6 text-center">
+                                        {req.status === "inprogress" ? (
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <div className="inline-flex items-center gap-1 text-primary text-[10px] font-black uppercase tracking-widest cursor-help">
+                                                        <Person className="size-3" /> Assigned
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
+                                                    {`${req.donorName || "Donor"} (${req.donorEmail || "N/A"})`}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        ) : (
+                                            <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest">—</span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-6">
+                                        <Chip
+                                            variant="flat"
+                                            color={getStatusColor(req.status)}
+                                            size="sm"
+                                            className="uppercase text-[9px] font-black tracking-widest px-2"
+                                        >
+                                            {req.status}
+                                        </Chip>
+                                    </td>
+                                    <td className="px-6 py-6 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <Button
+                                                        as={Link}
+                                                        href={`/dashboard/edit-donation-request/${req._id}`}
+                                                        isIconOnly
+                                                        variant="light"
+                                                        size="sm"
+                                                        className="text-neutral-400 hover:text-[#991b1b]"
+                                                    >
+                                                        <Pencil className="size-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
+                                                    Edit Request
+                                                </TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <Button
+                                                        isIconOnly
+                                                        variant="light"
+                                                        size="sm"
+                                                        className="text-neutral-400 hover:text-red-600"
+                                                    >
+                                                        <TrashBin className="size-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
+                                                    Delete
+                                                </TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <Button
+                                                        as={Link}
+                                                        href={`/dashboard/donation-request-details/${req._id}`}
+                                                        isIconOnly
+                                                        variant="light"
+                                                        size="sm"
+                                                        className="text-neutral-400 hover:text-blue-600"
+                                                    >
+                                                        <Eye className="size-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
+                                                    View Details
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            <div className="flex justify-center pt-4">
+                <Link href="/dashboard/my-donation-requests">
+                    <Button
+                        className="bg-[#991b1b] text-white font-black px-12 py-7 rounded-2xl hover:bg-black transition-all shadow-xl shadow-red-100 uppercase tracking-widest text-xs"
+                    >
+                        View My All Requests
+                    </Button></Link>
+            </div>
         </div>
     );
 
+    if (isLoading) {
+        return (
+            <div className="flex h-[50vh] items-center justify-center">
+                <div className="size-12 animate-spin rounded-full border-4 border-red-600 border-t-transparent"></div>
+            </div>
+        );
+    }
 
     return (
-        <section className="space-y-10">
+        <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {WelcomeSection}
-            {role === "donor" ? DonorRecentRequests : AdminStats}
+            {role === "donor" ? (requests.length > 0 ? DonorRecentRequests : null) : AdminStats}
         </section>
     )
 }
