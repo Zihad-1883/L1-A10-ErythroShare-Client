@@ -1,10 +1,31 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        const { data, error } = await authClient.signIn.email({
+            email,
+            password
+        })
+
+        if (error) {
+            toast.error(error.message || "Login failed!");
+            return;
+        }
+
+        toast.success("Login successful!");
+        // console.log(data);
+        router.push("/");
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-6">
@@ -14,11 +35,11 @@ const LoginPage = () => {
                     <p className="text-gray-500">Log in to your ErythroShare account</p>
                 </div>
 
-                <form className="space-y-6">
-                    {/* Email */}
+                <form onSubmit={onSubmit} className="space-y-6">
+
                     <div>
                         <label className="block text-gray-700 font-bold mb-2 text-sm">Email Address</label>
-                        <input 
+                        <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -28,10 +49,9 @@ const LoginPage = () => {
                         />
                     </div>
 
-                    {/* Password */}
                     <div>
                         <label className="block text-gray-700 font-bold mb-2 text-sm">Password</label>
-                        <input 
+                        <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -42,8 +62,8 @@ const LoginPage = () => {
                     </div>
 
                     <div className="mt-8">
-                        <button 
-                            type="button"
+                        <button
+                            type="submit"
                             className="w-full bg-[#991b1b] text-white p-5 rounded-2xl font-bold text-lg hover:bg-red-900 transition shadow-xl active:scale-95"
                         >
                             Log In
@@ -52,7 +72,7 @@ const LoginPage = () => {
                 </form>
 
                 <div className="mt-8 text-center text-gray-600">
-                    Don't have an account?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/auth/signup" className="text-red-800 font-bold hover:underline">
                         Sign Up
                     </Link>

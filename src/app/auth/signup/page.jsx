@@ -1,11 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
+import { authClient } from "@/lib/auth-client";
+import uploadImage from "@/lib/uploadImage";
+import { toast } from "react-toastify";
 
 const SignupPage = () => {
-    // amateur state for form
+    const router = useRouter();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [avatar, setAvatar] = useState(null);
@@ -14,13 +18,65 @@ const SignupPage = () => {
     const [selectedUpazila, setSelectedUpazila] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    // extract actual data arrays from the json structure
     const districts = districtsData[2].data;
     const upazilas = upazilasData[2].data;
 
-    // filter upazilas based on selected district
     const filteredUpazilas = upazilas.filter(u => u.district_id === selectedDistrict);
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match!");
+            return;
+        }
+
+        if (!avatar) {
+            toast.error("Please upload a profile picture.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // 1. Upload Image to ImgBB
+            const imageUrl = await uploadImage(avatar);
+
+            if (!imageUrl) {
+                toast.error("Image upload failed. Please try again.");
+                setLoading(false);
+                return;
+            }
+
+            // 2. Perform Signup
+            const { data, error } = await authClient.signUp.email({
+                name,
+                email,
+                image: imageUrl,
+                bloodGroup,
+                district: selectedDistrict,
+                upazila: selectedUpazila,
+                password,
+                callbackURL: "/"
+            });
+
+            if (error) {
+                toast.error(error.message || "Signup failed!");
+                setLoading(false);
+                return;
+            }
+
+            toast.success("Account created successfully!");
+            // console.log(data);
+            router.push("/");
+        } catch (err) {
+            console.error("Unexpected error:", err);
+            toast.error("An unexpected error occurred. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-6">
@@ -30,7 +86,9 @@ const SignupPage = () => {
                     <p className="text-gray-500">Join the ErythroShare community and save lives</p>
                 </div>
 
-                <form className="space-y-6">
+                <form
+                    onSubmit={onSubmit}
+                    className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-gray-700 font-bold mb-2 text-sm">Full Name</label>
@@ -57,9 +115,10 @@ const SignupPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 font-bold mb-2 text-sm">Profile Picture (Avatar)</label>
+                            <label className="block text-gray-700 font-bold mb-2 text-sm">Profile Picture (Avatar) <span className="text-red-500">*</span></label>
                             <input
                                 type="file"
+                                accept="image/*"
                                 onChange={(e) => setAvatar(e.target.files[0])}
                                 className="w-full p-3 rounded-xl border border-gray-200 bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-900 hover:file:bg-red-100"
                                 required
@@ -144,10 +203,18 @@ const SignupPage = () => {
 
                     <div className="mt-8">
                         <button
-                            type="button"
-                            className="w-full bg-[#991b1b] text-white p-5 rounded-2xl font-bold text-lg hover:bg-red-900 transition shadow-xl active:scale-95"
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-[#991b1b] text-white p-5 rounded-2xl font-bold text-lg hover:bg-red-900 transition shadow-xl active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                         >
-                            Sign Up
+                            {loading ? (
+                                <>
+                                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                    Signing Up...
+                                </>
+                            ) : (
+                                "Sign Up"
+                            )}
                         </button>
                     </div>
                 </form>

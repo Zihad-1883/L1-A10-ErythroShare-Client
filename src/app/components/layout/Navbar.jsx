@@ -2,13 +2,28 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { HiMenu, HiX } from "react-icons/hi";
-import { FaChevronDown } from "react-icons/fa";
+import { useSession, authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
-  // amature way to handle state for now
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const { data: session } = useSession();
+  const isLoggedIn = !!session;
+
+  const handleLogout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/auth/login");
+        },
+      },
+    });
+    setIsOpen(false);
+    setIsMenuOpen(false);
+  };
 
   // function to toggle dropdown
   const toggleDropdown = () => {
@@ -66,7 +81,7 @@ const Navbar = () => {
                   className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center overflow-hidden focus:outline-none"
                 >
                   <img
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                    src={session.user.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
                     alt="User"
                     className="w-full h-full object-cover"
                   />
@@ -82,11 +97,8 @@ const Navbar = () => {
                       Dashboard
                     </Link>
                     <button
-                      onClick={() => {
-                        setIsLoggedIn(false);
-                        setIsOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800"
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-800 text-red-600 font-semibold"
                     >
                       Logout
                     </button>
@@ -149,10 +161,7 @@ const Navbar = () => {
                   Dashboard
                 </Link>
                 <button
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    setIsMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="text-red-800 font-bold p-2 text-left"
                 >
                   Logout
@@ -162,14 +171,6 @@ const Navbar = () => {
           </div>
         </div>
       )}
-
-      <button
-        onClick={() => setIsLoggedIn(!isLoggedIn)}
-        className="fixed bottom-4 right-4 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-20 hover:opacity-100 transition z-[100]"
-      >
-        Toggle Login State (Dev)
-      </button>
-
     </nav>
   );
 };

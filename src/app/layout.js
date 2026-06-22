@@ -18,6 +18,8 @@ export const metadata = {
 
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function RootLayout({ children }) {
   return (
@@ -31,6 +33,18 @@ export default function RootLayout({ children }) {
           {children}
         </div>
         <Footer />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </body>
     </html>
   );
