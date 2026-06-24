@@ -78,7 +78,6 @@ export default function CreateDonationRequest() {
             });
         } else {
             toast.error("Failed to create donation request");
-            console.log(res.error)
         }
     };
 

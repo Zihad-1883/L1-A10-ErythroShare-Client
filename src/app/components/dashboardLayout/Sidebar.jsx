@@ -8,8 +8,8 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
 export function Sidebar() {
-    const { data: session } = useSession();
-    const role = session?.user?.role || "donor";
+    const { data: session, isPending } = useSession();
+    const role = session?.user?.role;
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -33,33 +33,41 @@ export function Sidebar() {
         ],
     };
 
-    const currentNavItems = menuData[role] || menuData.donor;
+    const currentNavItems = role ? (menuData[role] || menuData.donor) : [];
 
     const navLinks = (
         <nav className="flex flex-col gap-2 p-4">
             <div className="mb-6 px-2 text-xl font-bold text-[#991b1b]">
                 ErythroShare
             </div>
-            {currentNavItems.map((item) => {
-                const isActive = pathname === item.link;
-                return (
-                    <Link
-                        key={item.label}
-                        href={item.link}
-                        className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all hover:bg-red-50 hover:text-[#991b1b] ${
-                            isActive 
-                            ? "bg-red-50 text-[#991b1b]" 
-                            : "text-foreground/80 hover:bg-neutral-100"
-                        }`}
-                        onClick={() => setIsOpen(false)}
-                    >
-                        <item.icon className={`size-5 transition-colors ${
-                            isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
-                        }`} />
-                        {item.label}
-                    </Link>
-                );
-            })}
+            {isPending ? (
+                <div className="space-y-2">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-11 w-full animate-pulse rounded-xl bg-neutral-100/80" />
+                    ))}
+                </div>
+            ) : (
+                currentNavItems.map((item) => {
+                    const isActive = pathname === item.link;
+                    return (
+                        <Link
+                            key={item.label}
+                            href={item.link}
+                            className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all hover:bg-red-50 hover:text-[#991b1b] ${
+                                isActive 
+                                ? "bg-red-50 text-[#991b1b]" 
+                                : "text-foreground/80 hover:bg-neutral-100"
+                            }`}
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <item.icon className={`size-5 transition-colors ${
+                                isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
+                            }`} />
+                            {item.label}
+                        </Link>
+                    );
+                })
+            )}
         </nav>
     );
 
