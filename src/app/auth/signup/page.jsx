@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import districtsData from "@/data/district.json";
@@ -23,7 +23,14 @@ const SignupPage = () => {
     const districts = districtsData[2].data;
     const upazilas = upazilasData[2].data;
 
-    const filteredUpazilas = upazilas.filter(u => u.district_id === selectedDistrict);
+    const selectedDistrictId = useMemo(() => {
+        return districts.find(d => d.name === selectedDistrict)?.id;
+    }, [selectedDistrict, districts]);
+
+    const filteredUpazilas = useMemo(() => {
+        if (!selectedDistrictId) return [];
+        return upazilas.filter(u => u.district_id === selectedDistrictId);
+    }, [selectedDistrictId, upazilas]);
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -149,13 +156,16 @@ const SignupPage = () => {
                             <label className="block text-gray-700 font-bold mb-2 text-sm">District</label>
                             <select
                                 value={selectedDistrict}
-                                onChange={(e) => setSelectedDistrict(e.target.value)}
+                                onChange={(e) => {
+                                    setSelectedDistrict(e.target.value);
+                                    setSelectedUpazila("");
+                                }}
                                 className="w-full p-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-800 transition bg-white"
                                 required
                             >
                                 <option value="">Select District</option>
                                 {districts.map((d) => (
-                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                    <option key={d.id} value={d.name}>{d.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -171,7 +181,7 @@ const SignupPage = () => {
                             >
                                 <option value="">Select Upazila</option>
                                 {filteredUpazilas.map((u) => (
-                                    <option key={u.id} value={u.id}>{u.name}</option>
+                                    <option key={u.id} value={u.name}>{u.name}</option>
                                 ))}
                             </select>
                         </div>

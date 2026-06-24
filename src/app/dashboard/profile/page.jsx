@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useSession } from "@/lib/auth-client";
 import {
     Button,
@@ -15,9 +15,17 @@ import {
     Card,
     CardHeader,
     CardContent,
-    Separator
+    Chip
 } from "@heroui/react";
-import { Pencil, FloppyDisk, Person, Envelope, MapPin, Droplet } from "@gravity-ui/icons";
+import {
+    Pencil,
+    FloppyDisk,
+    Person,
+    MapPin,
+    Droplet,
+    Xmark,
+    ShieldCheck
+} from "@gravity-ui/icons";
 import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
 import { toast } from "react-toastify";
@@ -29,34 +37,32 @@ const allUpazilas = upazilasData[2]?.data || [];
 export default function ProfilePage() {
     const { data: session } = useSession();
     const [isEditing, setIsEditing] = useState(false);
+
     const [formData, setFormData] = useState({
         name: "",
-        email: "",
-        avatar: "",
+        image: "",
         district: "",
         upazila: "",
         bloodGroup: ""
     });
 
-    const [isInitialized, setIsInitialized] = useState(false);
-
-    if (session?.user && !isInitialized) {
-        setIsInitialized(true);
+    const startEditing = () => {
         setFormData({
-            name: session.user.name || "",
-            email: session.user.email || "",
-            avatar: session.user.image || "",
-            district: session.user.district || "",
-            upazila: session.user.upazila || "",
-            bloodGroup: session.user.bloodGroup || ""
+            name: session?.user?.name || "",
+            image: session?.user?.image || "",
+            district: session?.user?.district || "",
+            upazila: session?.user?.upazila || "",
+            bloodGroup: session?.user?.bloodGroup || ""
         });
-    }
+        setIsEditing(true);
+    };
 
     const filteredUpazilas = useMemo(() => {
-        const districtId = districts.find(d => d.name === formData.district)?.id;
+        const targetDistrict = isEditing ? formData.district : session?.user?.district;
+        const districtId = districts.find(d => d.name === targetDistrict)?.id;
         if (!districtId) return [];
         return allUpazilas.filter(u => u.district_id === districtId);
-    }, [formData.district]);
+    }, [formData.district, session?.user?.district, isEditing]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -64,142 +70,134 @@ export default function ProfilePage() {
     };
 
     const handleSelectChange = (name, value) => {
+        const selectedValue = Array.from(value)[0] || "";
         setFormData(prev => {
-            const newData = { ...prev, [name]: value };
+            const newData = { ...prev, [name]: selectedValue };
             if (name === "district") newData.upazila = "";
             return newData;
         });
     };
 
-    const handleSave = () => {
-        toast.success("Profile updated successfully!");
+    const handleSave = (e) => {
+        e.preventDefault();
+        // Here you would normally send formData to your API
+        toast.success("Profile changes saved to temporary state!");
         setIsEditing(false);
     };
 
-    const labelClasses = "text-[10px] font-black text-neutral-400 uppercase tracking-[0.15em] mb-2 block ml-1";
+    const labelClasses = "text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 block ml-1";
 
     return (
-        <section className="min-h-screen py-16 px-4 bg-[#fafafa] relative overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-[-10%] right-[-10%] size-[500px] bg-red-50 rounded-full blur-[120px] opacity-60 pointer-events-none" />
-            <div className="absolute bottom-[-10%] left-[-10%] size-[500px] bg-neutral-100 rounded-full blur-[120px] opacity-40 pointer-events-none" />
+        <section className="min-h-screen py-8 md:py-12 px-4 bg-[#fafafa] relative overflow-hidden">
+            <div className="absolute top-[-20%] right-[-10%] size-[800px] bg-red-50 rounded-full blur-[150px] opacity-60 pointer-events-none" />
 
-            <div className="max-w-4xl mx-auto relative z-10">
-                <Card className="border-none shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] rounded-[2.5rem] overflow-hidden bg-white/80 backdrop-blur-xl">
-                    <CardHeader className="relative h-64 bg-neutral-900 border-b border-white/10 flex items-end justify-center pb-0 overflow-hidden">
-                        {/* Mesh Gradient Overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#991b1b] via-neutral-900 to-black opacity-90" />
-                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-
-                        <div className="absolute top-6 right-8">
-                            {!isEditing ? (
-                                <Button
-                                    className="bg-white/10 backdrop-blur-md text-white font-bold rounded-2xl px-6 border border-white/20 hover:bg-white/20 transition-all"
-                                    onClick={() => setIsEditing(true)}
-                                    startContent={<Pencil className="size-4" />}
-                                >
-                                    Edit Profile
-                                </Button>
-                            ) : (
-                                <Button
-                                    className="bg-white text-black font-black rounded-2xl px-8 shadow-xl hover:scale-105 transition-transform"
-                                    onClick={handleSave}
-                                    startContent={<FloppyDisk className="size-4" />}
-                                >
-                                    Save Changes
-                                </Button>
-                            )}
-                        </div>
-
-                        <div className="relative -mb-20 group">
-                            <div className="absolute inset-0 bg-[#991b1b] rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                            <Avatar
-                                src={formData.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
-                                className="w-40 h-40 text-large border-[6px] border-white shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
-                            />
-                            {isEditing && (
-                                <div className="absolute bottom-2 right-2">
-                                    <div className="bg-white p-3 rounded-2xl shadow-2xl border border-neutral-100 cursor-pointer hover:bg-neutral-50 transition-colors">
-                                        <Pencil className="size-5 text-[#991b1b]" />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="pt-28 px-8 md:px-20 pb-20">
-                        <div className="text-center mb-16">
-                            <h1 className="text-4xl font-black text-neutral-900 tracking-tight">{formData.name || "User Name"}</h1>
-                            <div className="flex items-center justify-center gap-3 mt-3">
-                                <span className="bg-red-50 text-[#991b1b] px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-red-100">
-                                    {session?.user?.role || "Member"}
+            <div className="max-w-5xl mx-auto relative z-10">
+                {/* Header Section */}
+                <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
+                    <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                        <Avatar
+                            src={session?.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                            className="w-24 h-24 border-4 border-white shadow-2xl"
+                        />
+                        <div>
+                            <h1 className="text-3xl font-black text-neutral-900 tracking-tight">
+                                {session?.user?.name || "Getting User Profile..."}
+                            </h1>
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1">
+                                <span className="bg-[#991b1b]/10 text-[#991b1b] font-black uppercase text-[9px]">
+                                    {session?.user?.role}
                                 </span>
-                                <span className="bg-neutral-50 text-neutral-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-neutral-100">
-                                    {formData.bloodGroup || "O+"} Blood Type
+                                <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
+                                    {session?.user?.district || "Location pending..."}
                                 </span>
                             </div>
                         </div>
+                    </div>
 
-                        <Separator className="mb-16 opacity-10 bg-neutral-900" />
+                    <div className="w-full md:w-auto">
+                        {!isEditing ? (
+                            <Button
+                                className="w-full md:w-auto bg-[#991b1b] text-white font-black rounded-2xl px-8 h-12 shadow-xl hover:scale-105"
+                                onClick={startEditing}
+                                startContent={<Pencil className="size-4" />}
+                            >
+                                Modify Profile
+                            </Button>
+                        ) : (
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="bordered"
+                                    className="flex-1 md:flex-none border-2 font-bold rounded-2xl px-6 h-12"
+                                    onClick={() => setIsEditing(false)}
+                                    startContent={<Xmark className="size-4" />}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    className="flex-1 md:flex-none bg-black text-white font-black rounded-2xl px-10 h-12 shadow-2xl"
+                                    onClick={handleSave}
+                                    startContent={<FloppyDisk className="size-4" />}
+                                >
+                                    Save Profile
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-                            {/* Personal Info */}
-                            <div className="space-y-10">
-                                <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                    <div className="w-8 h-[2px] bg-[#991b1b]" /> Personal
-                                </h3>
+                <Card className={`border-none shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white/80 backdrop-blur-2xl transition-all duration-500 ${isEditing ? "ring-2 ring-[#991b1b]/20" : ""}`}>
+                    <CardContent className="p-8 md:p-16">
+                        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 md:gap-y-10">
+                            {/* Personal Details */}
+                            <div className="space-y-2">
+                                <label className={labelClasses}>Full Legal Identity</label>
+                                <Input
+                                    name="name"
+                                    variant="bordered"
+                                    isDisabled={!isEditing}
+                                    value={isEditing ? formData.name : (session?.user?.name || "")}
+                                    onChange={handleInputChange}
+                                    classNames={{
+                                        input: "font-bold text-neutral-800",
+                                        inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
+                                    }}
+                                    startContent={<Person className="size-4 text-neutral-400" />}
+                                />
+                            </div>
 
-                                <div className="group">
-                                    <label className={labelClasses}>Full Identity</label>
-                                    <Input
-                                        name="name"
-                                        variant="bordered"
-                                        isDisabled={!isEditing}
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        classNames={{
-                                            input: "font-bold text-neutral-800",
-                                            inputWrapper: "border-2 group-hover:border-neutral-400 transition-colors rounded-2xl h-14"
-                                        }}
-                                        placeholder="Full Name"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <label className={labelClasses}>Email Address (Protected)</label>
+                                <Input
+                                    isDisabled={true}
+                                    value={session?.user?.email || ""}
+                                    classNames={{
+                                        input: "font-bold text-neutral-400",
+                                        inputWrapper: "border-2 rounded-3xl h-14 bg-neutral-100/50 border-neutral-100"
+                                    }}
+                                    startContent={<ShieldCheck className="size-4 text-neutral-300" />}
+                                />
+                            </div>
 
-                                <div className="group">
-                                    <label className={labelClasses}>Contact Email</label>
-                                    <Input
-                                        name="email"
-                                        variant="bordered"
-                                        isDisabled={true}
-                                        value={formData.email}
-                                        classNames={{
-                                            input: "font-bold text-neutral-500",
-                                            inputWrapper: "border-2 rounded-2xl h-14 bg-neutral-50/50"
-                                        }}
-                                        startContent={<Envelope className="size-4 text-neutral-400" />}
-                                    />
-                                </div>
-
+                            <div className="space-y-2">
+                                <label className={labelClasses}>Blood Type Module</label>
                                 <Select
                                     isDisabled={!isEditing}
-                                    selectedKey={formData.bloodGroup}
-                                    onSelectionChange={(key) => handleSelectChange("bloodGroup", key)}
-                                    className="w-full group"
+                                    placeholder={session?.user?.bloodGroup}
+                                    selectedKeys={isEditing ? (formData.bloodGroup ? [formData.bloodGroup] : []) : (session?.user?.bloodGroup ? [session?.user?.bloodGroup] : [])}
+                                    onSelectionChange={(keys) => handleSelectChange("bloodGroup", keys)}
+                                    className="w-full"
                                 >
-                                    <label className={labelClasses}>Blood Group</label>
-                                    <SelectTrigger
-                                        className="border-2 rounded-2xl h-14 px-4 font-bold text-neutral-800 group-hover:border-neutral-400 transition-colors bg-white w-full flex items-center justify-between"
-                                    >
+                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
                                         <div className="flex items-center gap-3">
                                             <Droplet className="size-4 text-[#991b1b]" />
-                                            <SelectValue placeholder="Select Type" />
+                                            <SelectValue placeholder="Unknown Group" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/90 backdrop-blur-xl border border-neutral-100 shadow-2xl rounded-2xl mt-2 overflow-hidden min-w-[200px]">
+                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 outline-none">
                                         <ListBox className="p-2 outline-none">
                                             {bloodGroups.map(group => (
-                                                <ListBoxItem key={group} id={group} className="px-4 py-3 rounded-xl cursor-pointer hover:bg-[#991b1b] hover:text-white transition-colors font-bold outline-none text-sm">
-                                                    {group}
+                                                <ListBoxItem key={group} id={group} className="px-5 py-4 rounded-2xl hover:bg-[#991b1b] hover:text-white font-bold transition-all outline-none">
+                                                    {group} Type
                                                 </ListBoxItem>
                                             ))}
                                         </ListBox>
@@ -207,99 +205,77 @@ export default function ProfilePage() {
                                 </Select>
                             </div>
 
-                            {/* Location Info */}
-                            <div className="space-y-10">
-                                <h3 className="text-xs font-black text-neutral-900 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-                                    <div className="w-8 h-[2px] bg-red-300" /> Geography
-                                </h3>
+                            <div className="space-y-2">
+                                <label className={labelClasses}>Avatar Source URL</label>
+                                <Input
+                                    name="avatar"
+                                    variant="bordered"
+                                    isDisabled={!isEditing}
+                                    value={isEditing ? formData.image : (session?.user?.image || "")}
+                                    onChange={handleInputChange}
+                                    classNames={{
+                                        input: "font-mono text-[10px] text-neutral-500",
+                                        inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
+                                    }}
+                                    placeholder="Enter image link"
+                                />
+                            </div>
 
+                            {/* Geography Section */}
+                            <div className="space-y-2">
+                                <label className={labelClasses}>State / District</label>
                                 <Select
                                     isDisabled={!isEditing}
-                                    selectedKey={formData.district}
-                                    onSelectionChange={(key) => handleSelectChange("district", key)}
-                                    className="w-full group"
+                                    placeholder={session?.user?.district}
+                                    selectedKeys={isEditing ? (formData.district ? [formData.district] : []) : (session?.user?.district ? [session?.user?.district] : [])}
+                                    onSelectionChange={(keys) => handleSelectChange("district", keys)}
+                                    className="w-full"
                                 >
-                                    <label className={labelClasses}>Current District</label>
-                                    <SelectTrigger
-                                        className="border-2 rounded-2xl h-14 px-4 font-bold text-neutral-800 group-hover:border-neutral-400 transition-colors bg-white w-full flex items-center justify-between"
-                                    >
+                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
                                         <div className="flex items-center gap-3">
                                             <MapPin className="size-4 text-neutral-400" />
-                                            <SelectValue placeholder="Select District" />
+                                            <SelectValue placeholder="No District" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/90 backdrop-blur-xl border border-neutral-100 shadow-2xl rounded-2xl mt-2 overflow-hidden min-w-[200px]">
-                                        <ListBox className="p-2 outline-none max-h-60 overflow-y-auto">
+                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
+                                        <ListBox className="p-2 max-h-64 overflow-y-auto outline-none">
                                             {districts.map(d => (
-                                                <ListBoxItem key={d.name} id={d.name} className="px-4 py-3 rounded-xl cursor-pointer hover:bg-[#991b1b] hover:text-white transition-colors font-bold outline-none text-sm">
+                                                <ListBoxItem key={d.name} id={d.name} className="px-5 py-3 rounded-2xl hover:bg-neutral-900 hover:text-white font-bold transition-all outline-none">
                                                     {d.name}
                                                 </ListBoxItem>
                                             ))}
                                         </ListBox>
                                     </SelectPopover>
                                 </Select>
+                            </div>
 
+                            <div className="space-y-2">
+                                <label className={labelClasses}>Regional Upazila</label>
                                 <Select
-                                    isDisabled={!isEditing || !formData.district}
-                                    selectedKey={formData.upazila}
-                                    onSelectionChange={(key) => handleSelectChange("upazila", key)}
-                                    className="w-full group"
+                                    isDisabled={!isEditing || (isEditing && !formData.district)}
+                                    placeholder={session?.user?.upazila}
+                                    selectedKeys={isEditing ? (formData.upazila ? [formData.upazila] : []) : (session?.user?.upazila ? [session?.user?.upazila] : [])}
+                                    onSelectionChange={(keys) => handleSelectChange("upazila", keys)}
+                                    className="w-full"
                                 >
-                                    <label className={labelClasses}>Local Upazila</label>
-                                    <SelectTrigger
-                                        className="border-2 rounded-2xl h-14 px-4 font-bold text-neutral-800 group-hover:border-neutral-400 transition-colors bg-white w-full flex items-center justify-between"
-                                    >
+                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
                                         <div className="flex items-center gap-3">
                                             <MapPin className="size-4 text-neutral-300" />
-                                            <SelectValue placeholder="Select Upazila" />
+                                            <SelectValue placeholder="No Upazila" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/90 backdrop-blur-xl border border-neutral-100 shadow-2xl rounded-2xl mt-2 overflow-hidden min-w-[200px]">
-                                        <ListBox className="p-2 outline-none max-h-60 overflow-y-auto">
+                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
+                                        <ListBox className="p-2 max-h-64 overflow-y-auto outline-none">
                                             {filteredUpazilas.map(u => (
-                                                <ListBoxItem key={u.name} id={u.name} className="px-4 py-3 rounded-xl cursor-pointer hover:bg-[#991b1b] hover:text-white transition-colors font-bold outline-none text-sm">
+                                                <ListBoxItem key={u.name} id={u.name} className="px-5 py-3 rounded-2xl hover:bg-[#991b1b] hover:text-white font-bold transition-all outline-none">
                                                     {u.name}
                                                 </ListBoxItem>
                                             ))}
                                         </ListBox>
                                     </SelectPopover>
                                 </Select>
-
-                                <div className="group">
-                                    <label className={labelClasses}>Profile Image URL</label>
-                                    <Input
-                                        name="avatar"
-                                        variant="bordered"
-                                        isDisabled={!isEditing}
-                                        value={formData.avatar}
-                                        onChange={handleInputChange}
-                                        classNames={{
-                                            input: "font-bold text-neutral-800 text-xs",
-                                            inputWrapper: "border-2 group-hover:border-neutral-400 transition-colors rounded-2xl h-14"
-                                        }}
-                                        placeholder="Paste image link"
-                                    />
-                                </div>
                             </div>
                         </form>
-
-                        {isEditing && (
-                            <div className="mt-20 flex justify-center gap-6 animate-in fade-in zoom-in-95 duration-500">
-                                <Button
-                                    variant="flat"
-                                    className="font-black px-12 py-7 rounded-2xl border-2 border-neutral-100 hover:bg-neutral-100 transition-colors uppercase tracking-widest text-xs"
-                                    onClick={() => setIsEditing(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    className="bg-black text-white font-black px-12 py-7 rounded-2xl hover:bg-[#991b1b] transition-all shadow-2xl shadow-neutral-200 uppercase tracking-widest text-xs"
-                                    onClick={handleSave}
-                                >
-                                    Save Profile
-                                </Button>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
             </div>
