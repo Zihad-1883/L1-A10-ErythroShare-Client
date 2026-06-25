@@ -36,6 +36,7 @@ const allUpazilas = upazilasData[2]?.data || [];
 
 export default function ProfilePage() {
     const { data: session } = useSession();
+    console.log(session?.user?.image)
     const [isEditing, setIsEditing] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -95,20 +96,23 @@ export default function ProfilePage() {
                 {/* Header Section */}
                 <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                        <Avatar
-                            src={session?.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
-                            className="w-24 h-24 border-4 border-white shadow-2xl"
-                        />
+                        <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-neutral-100 flex-shrink-0">
+                            <img
+                                src={session?.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
                         <div>
                             <h1 className="text-3xl font-black text-neutral-900 tracking-tight">
                                 {session?.user?.name || "Getting User Profile..."}
                             </h1>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1">
-                                <span className="bg-[#991b1b]/10 text-[#991b1b] font-black uppercase text-[9px]">
+                                <span className="bg-[#991b1b]/10 text-[#991b1b] px-2 py-1 rounded-full font-black uppercase text-[9px]">
                                     {session?.user?.role}
                                 </span>
                                 <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
-                                    {session?.user?.district || "Location pending..."}
+                                    {session?.user?.district || "Location pending..."}, {session?.user?.upazila}
                                 </span>
                             </div>
                         </div>
@@ -208,7 +212,7 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <label className={labelClasses}>Avatar Source URL</label>
                                 <Input
-                                    name="avatar"
+                                    name="image"
                                     variant="bordered"
                                     isDisabled={!isEditing}
                                     value={isEditing ? formData.image : (session?.user?.image || "")}

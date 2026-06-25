@@ -56,8 +56,8 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          <Link 
-            href="/donation-requests" 
+          <Link
+            href="/donation-requests"
             className={`${pathname === "/donation-requests" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
           >
             Donation Requests
@@ -65,14 +65,14 @@ const Navbar = () => {
 
           {!isLoggedIn ? (
             <>
-              <Link 
-                href="/search" 
+              <Link
+                href="/search"
                 className={`${pathname === "/search" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
               >
                 Search Donors
               </Link>
-              <Link 
-                href="/auth/login" 
+              <Link
+                href="/auth/login"
                 className={`${pathname === "/auth/login" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
               >
                 Login
@@ -83,8 +83,8 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link 
-                href="/funding" 
+              <Link
+                href="/funding"
                 className={`${pathname === "/funding" ? "text-red-800 font-bold" : "text-gray-700 font-medium"} hover:text-red-800 transition`}
               >
                 Funding Links
@@ -96,7 +96,7 @@ const Navbar = () => {
                   className="w-10 h-10 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center overflow-hidden focus:outline-none"
                 >
                   <img
-                    src={session.user.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                    src={session?.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
                     alt="User"
                     className="w-full h-full object-cover"
                   />
