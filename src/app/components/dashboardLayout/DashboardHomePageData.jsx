@@ -1,7 +1,7 @@
 import { useSession } from "@/lib/auth-client"
 import React, { useEffect, useState } from "react"
 import { Person, Bars, Bell, Pencil, TrashBin, Eye, Clock, MapPin } from "@gravity-ui/icons";
-import { serverQuery } from "@/lib/actions/server";
+import { serverQuery, getAllBloodDonationRequest, getAllUsers } from "@/lib/actions/server";
 import {
     Button,
     Chip,
@@ -15,32 +15,57 @@ export default function DashboardHomePageData() {
     const { data: session } = useSession();
     const role = session?.user?.role;
     const [requests, setRequests] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchRecentRequests = async () => {
-            if (role === "donor" && session?.user?.email) {
-                try {
+        const fetchData = async () => {
+            if (!session?.user?.email) {
+                setIsLoading(false);
+                return;
+            };
+
+            try {
+                if (role === "donor") {
                     const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
                     setRequests(Array.isArray(data) ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3) : []);
-                } catch (error) {
-                    console.error("Error fetching recent requests:", error);
-                } finally {
-                    setIsLoading(false);
+                } else if (role === "admin" || role === "volunteer") {
+                    const data = await getAllBloodDonationRequest();
+                    setRequests(Array.isArray(data) ? data : []);
                 }
-            } else {
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+            } finally {
                 setIsLoading(false);
             }
         };
-        fetchRecentRequests();
-    }, [role, session]);
+
+        if (role) {
+            fetchData();
+        } else if (session === null) {
+            const timer = setTimeout(() => setIsLoading(false), 0);
+            return () => clearTimeout(timer);
+        }
+    }, [role, session, session?.user?.email]);
+
+    useEffect(() => {
+        const fetchAllUsers = async () => {
+            const data = await getAllUsers();
+            const donors = data.filter(d => d.role === "donor")
+            setAllUsers(donors);
+            setIsLoading(false);
+        }
+        fetchAllUsers();
+    }, []);
+
+    // console.log(allUsers);
 
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
-            case "pending": return "warning";
-            case "inprogress": return "primary";
-            case "done": return "success";
-            case "canceled": return "danger";
+            case "pending": return "text-amber-600 bg-amber-50 border-amber-100";
+            case "inprogress": return "text-blue-600 bg-blue-50 border-blue-100";
+            case "done": return "text-emerald-600 bg-emerald-50 border-emerald-100";
+            case "canceled": return "text-rose-600 bg-rose-50 border-rose-100";
             default: return "default";
         }
     };
@@ -64,9 +89,9 @@ export default function DashboardHomePageData() {
     const AdminStats = (
         <div className="grid gap-6 md:grid-cols-3">
             {[
-                { icon: Person, label: "Total Donors", value: "0" },
+                { icon: Person, label: "Total Donors", value: allUsers.length },
                 { icon: Bars, label: "Total Funding", value: "$0" },
-                { icon: Bell, label: "Total Requests", value: "0" }
+                { icon: Bell, label: "Total Requests", value: requests.length }
             ].map((stat, idx) => (
                 <div key={idx} className="rounded-[2.5rem] border border-neutral-100 bg-white p-8 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center group">
                     <div className="bg-neutral-50 p-5 rounded-3xl text-[#991b1b] mb-4 group-hover:scale-110 transition-transform">
@@ -100,7 +125,7 @@ export default function DashboardHomePageData() {
                             <tr className="text-xs text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50 px-6">
                                 <th className="px-6 py-5 font-black whitespace-nowrap">Recipient</th>
                                 <th className="px-6 py-5 font-black whitespace-nowrap">Location</th>
-                                <th className="px-6 py-5 font-black whitespace-nowrap text-center">Info</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap text-center">Donor</th>
                                 <th className="px-6 py-5 font-black whitespace-nowrap">Status</th>
                                 <th className="px-6 py-5 font-black whitespace-nowrap text-right">Actions</th>
                             </tr>
@@ -131,28 +156,28 @@ export default function DashboardHomePageData() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-6 text-center">
+                                    <td className="px-6 py-6">
                                         {req.status === "inprogress" ? (
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <div className="inline-flex items-center gap-1 text-primary text-[10px] font-black uppercase tracking-widest cursor-help">
-                                                        <Person className="size-3" /> Assigned
-                                                    </div>
-                                                </TooltipTrigger>
-                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
-                                                    {`${req.donorName || "Donor"} (${req.donorEmail || "N/A"})`}
-                                                </TooltipContent>
-                                            </Tooltip>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <div className="flex items-center gap-2 text-[11px] font-black text-neutral-800">
+                                                    <Person className="size-3 text-blue-500" />
+                                                    {req.donorName || "Assigned"}
+                                                </div>
+                                                <div className="text-[9px] text-neutral-400 font-bold italic">
+                                                    {req.donorEmail || "N/A"}
+                                                </div>
+                                            </div>
                                         ) : (
-                                            <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest">—</span>
+                                            <div className="flex items-center justify-center gap-2 text-[10px] text-neutral-300 font-bold uppercase tracking-widest opacity-40">
+                                                <Person className="size-3" /> None
+                                            </div>
                                         )}
                                     </td>
                                     <td className="px-6 py-6">
                                         <Chip
                                             variant="flat"
-                                            color={getStatusColor(req.status)}
                                             size="sm"
-                                            className="uppercase text-[9px] font-black tracking-widest px-2"
+                                            className={`uppercase text-[9px] font-black tracking-widest px-2 ${getStatusColor(req.status)}`}
                                         >
                                             {req.status}
                                         </Chip>

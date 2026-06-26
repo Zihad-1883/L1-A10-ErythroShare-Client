@@ -33,6 +33,26 @@ export const getAllUsers = async () => {
     return serverQuery("/dashboard/all-users")
 }
 
+export const getAllBloodDonationRequest = async () => {
+    return serverQuery("/dashboard/all-blood-donation-request")
+}
+
+export const getDonationRequestById = async (id) => {
+    return serverQuery(`/dashboard/donation-request/${id}`)
+}
+
+export const deleteDonationRequest = async (id) => {
+    return serverMutation(`/dashboard/donation-request/${id}`, "DELETE")
+}
+
+export const updateDonationRequest = async (id, data) => {
+    return serverMutation(`/dashboard/donation-request-status/${id}`, "PATCH", data)
+}
+
+export const editDonationRequest = async (id, data) => {
+    return serverMutation(`/dashboard/donation-request/${id}`, "PATCH", data)
+}
+
 export const profileUpdate = async (data) => {
     return serverMutation("/dashboard/profile", "PATCH", data)
 }

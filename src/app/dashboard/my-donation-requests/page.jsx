@@ -1,29 +1,55 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { serverQuery } from "@/lib/actions/server";
-import { Bars, Clock, MapPin, Person } from "@gravity-ui/icons";
+import { Bars, Clock, MapPin, Person, Pencil, TrashBin, Eye, Xmark, CircleCheck, CircleInfo } from "@gravity-ui/icons";
+import { deleteDonationRequest, serverQuery } from "@/lib/actions/server";
+import { toast } from "react-toastify";
+import Link from "next/link";
 
 export default function MyDonationRequests() {
     const { data: session } = useSession();
     const [requests, setRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [requestToDelete, setRequestToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
-        const fetchRequests = async () => {
+        const loadRequests = async () => {
             if (session?.user?.email) {
                 try {
                     const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
-                    setRequests(data);
+                    setRequests(Array.isArray(data) ? data : []);
                 } catch (error) {
                     console.error("Error fetching requests:", error);
                 } finally {
                     setIsLoading(false);
                 }
             }
-        };
-        fetchRequests();
+        }
+        loadRequests();
     }, [session]);
+
+    const handleDelete = async () => {
+        if (!requestToDelete) return;
+        setIsDeleting(true);
+        try {
+            const res = await deleteDonationRequest(requestToDelete);
+            if (res.success) {
+                toast.success("Request deleted successfully");
+                setRequests(prev => prev.filter(req => req._id !== requestToDelete));
+                setIsDeleteModalOpen(false);
+            } else {
+                toast.error(res.message || "Failed to delete request");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            toast.error("An unexpected error occurred");
+        } finally {
+            setIsDeleting(false);
+            setRequestToDelete(null);
+        }
+    };
 
     console.log(requests)
 
@@ -81,6 +107,7 @@ export default function MyDonationRequests() {
                                 <th className="px-6 py-5 font-black">Recipient</th>
                                 <th className="px-6 py-5 font-black">Location</th>
                                 <th className="px-6 py-5 font-black">Date & Time</th>
+                                <th className="px-6 py-5 font-black whitespace-nowrap">Info</th>
                                 <th className="px-6 py-5 font-black text-center">Status</th>
                                 <th className="px-6 py-5 font-black text-right">Actions</th>
                             </tr>
@@ -135,6 +162,23 @@ export default function MyDonationRequests() {
                                                 </div>
                                             </div>
                                         </td>
+                                        <td className="px-6 py-6 font-medium text-neutral-600">
+                                            {req.status?.toLowerCase() === "inprogress" ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
+                                                        <Person className="size-3 text-blue-500" />
+                                                        {req.donorName || "Assigned"}
+                                                    </div>
+                                                    <div className="text-[10px] text-neutral-400 ml-5 italic">
+                                                        {req.donorEmail || "N/A"}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-[10px] text-neutral-300 font-bold uppercase tracking-widest ml-1 opacity-40">
+                                                    <Person className="size-3" /> None
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-6 text-center">
                                             <span className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusColor(req.status)}`}>
                                                 {req.status}
@@ -142,8 +186,29 @@ export default function MyDonationRequests() {
                                         </td>
                                         <td className="px-6 py-6 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button className="p-2 rounded-xl border border-neutral-100 hover:bg-white hover:border-red-100 hover:text-red-600 transition-all text-neutral-400">
-                                                    <Bars className="size-4" />
+                                                <Link
+                                                    href={`/dashboard/donation-request-details/${req._id}`}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all text-neutral-400"
+                                                    title="View Details"
+                                                >
+                                                    <Eye className="size-4" />
+                                                </Link>
+                                                <Link
+                                                    href={`/dashboard/edit-donation-request/${req._id}`}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all text-neutral-400"
+                                                    title="Edit Request"
+                                                >
+                                                    <Pencil className="size-4" />
+                                                </Link>
+                                                <button
+                                                    onClick={() => {
+                                                        setRequestToDelete(req._id);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all text-neutral-400"
+                                                    title="Delete Request"
+                                                >
+                                                    <TrashBin className="size-4" />
                                                 </button>
                                             </div>
                                         </td>
@@ -154,6 +219,52 @@ export default function MyDonationRequests() {
                     </table>
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+                    <div
+                        className="absolute inset-0 bg-neutral-950/60 animate-in fade-in duration-300"
+                        onClick={() => !isDeleting && setIsDeleteModalOpen(false)}
+                    ></div>
+
+                    <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl border border-neutral-100 animate-in zoom-in-95 duration-300">
+                        <div className="mb-8 text-center">
+                            <div className="size-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mx-auto mb-6">
+                                <CircleInfo className="size-8" />
+                            </div>
+                            <h3 className="text-2xl font-black text-neutral-900 tracking-tight uppercase italic">Confirm Deletion</h3>
+                            <p className="mt-2 text-neutral-500 text-sm font-bold">
+                                This action is permanent. All data associated with this protocol will be purged from the live registry.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                                className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-neutral-100 text-neutral-400 hover:bg-neutral-50 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="flex-1 py-4 bg-neutral-900 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-red-600 transition-all shadow-lg flex items-center justify-center gap-2"
+                            >
+                                {isDeleting ? (
+                                    <div className="size-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <>
+                                        <TrashBin className="size-3" />
+                                        Delete Forever
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
