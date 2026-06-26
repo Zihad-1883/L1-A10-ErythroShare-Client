@@ -44,3 +44,7 @@ export const updateStatus = async (data) => {
 export const updateRole = async (data) => {
     return serverMutation("/dashboard/user-role", "PATCH", data)
 }
+
+export const filteredUsersByStatus = async (status) => {
+    return serverQuery(`/dashboard/all-users?status=${status}`)
+}

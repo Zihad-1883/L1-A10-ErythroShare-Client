@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { getAllUsers, updateStatus, updateRole } from "@/lib/actions/server";
+import { getAllUsers, updateStatus, updateRole, filteredUsersByStatus } from "@/lib/actions/server";
 import {
     Avatar,
     Chip,
@@ -74,6 +74,7 @@ const UserActions = ({ user, onUpdate }) => {
         }
     };
 
+
     return (
         <div className="relative" ref={menuRef}>
             <button
@@ -88,7 +89,7 @@ const UserActions = ({ user, onUpdate }) => {
                     className="absolute right-0 mt-2 w-56 bg-white border border-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl py-3 px-2 z-[100] animate-in fade-in zoom-in-95 duration-200"
                 >
                     <div className="flex flex-col gap-0.5">
-                        {/* Status Toggle */}
+
                         {user.status === "active" ? (
                             <button
                                 onClick={() => handleStatusUpdate("blocked")}
@@ -109,7 +110,6 @@ const UserActions = ({ user, onUpdate }) => {
 
                         <div className="h-px bg-neutral-100 my-1.5 mx-2 opacity-50" />
 
-                        {/* Role Management */}
                         {user.role !== "admin" && (
                             <button
                                 onClick={() => handleRoleUpdate("admin")}
@@ -162,6 +162,24 @@ export default function AllUsersPage() {
         }
     }, []);
 
+    const handleFilteredUsers = async (status) => {
+        setIsLoading(true);
+        try {
+            let data;
+            if (status === "all") {
+                data = await getAllUsers();
+            } else {
+                data = await filteredUsersByStatus(status);
+            }
+            setUsers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error filtering users:", error);
+            toast.error("Failed to filter users");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchUsers();
@@ -199,9 +217,9 @@ export default function AllUsersPage() {
                             </SelectTrigger>
                             <SelectPopover className="bg-white border-neutral-100 rounded-[1.5rem] shadow-2xl overflow-hidden mt-3 outline-none">
                                 <ListBox className="p-3 outline-none min-w-64">
-                                    <ListBoxItem key="all" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-neutral-800 outline-none">Show All Users</ListBoxItem>
-                                    <ListBoxItem key="active" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-success outline-none">Active Users</ListBoxItem>
-                                    <ListBoxItem key="blocked" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-danger outline-none">Blocked Users</ListBoxItem>
+                                    <ListBoxItem textValue="Show All Users" onClick={() => handleFilteredUsers("all")} key="all" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-neutral-800 outline-none">Show All Users</ListBoxItem>
+                                    <ListBoxItem textValue="Active Users" onClick={() => handleFilteredUsers("active")} key="active" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-success outline-none">Active Users</ListBoxItem>
+                                    <ListBoxItem textValue="Blocked Users" onClick={() => handleFilteredUsers("blocked")} key="blocked" className="font-black uppercase text-[10px] tracking-widest rounded-xl px-5 py-4 hover:bg-neutral-50 text-danger outline-none">Blocked Users</ListBoxItem>
                                 </ListBox>
                             </SelectPopover>
                         </Select>

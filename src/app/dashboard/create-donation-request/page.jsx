@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
@@ -16,12 +16,12 @@ const allUpazilas = upazilasData[2]?.data || [];
 export default function CreateDonationRequest() {
     const { data: session } = useSession();
     const [selectedDistrict, setSelectedDistrict] = useState("");
-    const toastError = toast.error("You are blocked from creating donation requests")
-
-    if (session?.user?.status === "blocked") {
-        toastError;
-        redirect("/dashboard");
-    }
+    useEffect(() => {
+        if (session?.user?.status === "blocked") {
+            toast.error("You are blocked from creating donation requests", { toastId: "blocked-user" });
+            redirect("/dashboard");
+        }
+    }, [session?.user?.status]);
 
     const [addData, setAddData] = useState({
         recipientName: "",
