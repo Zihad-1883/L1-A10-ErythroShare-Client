@@ -29,6 +29,8 @@ import {
 import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
 import { toast } from "react-toastify";
+import { profileUpdate } from "@/lib/actions/server";
+import uploadImage from "@/lib/uploadImage";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const districts = districtsData[2]?.data || [];
@@ -36,33 +38,40 @@ const allUpazilas = upazilasData[2]?.data || [];
 
 export default function ProfilePage() {
     const { data: session } = useSession();
-    console.log(session?.user?.image)
+    // console.log(session?.user?.image)
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
 
     const [formData, setFormData] = useState({
         name: "",
+        email: "",
         image: "",
         district: "",
         upazila: "",
         bloodGroup: ""
     });
+    // console.log(formData);
 
     const startEditing = () => {
         setFormData({
             name: session?.user?.name || "",
+            email: session?.user?.email || "",
             image: session?.user?.image || "",
             district: session?.user?.district || "",
             upazila: session?.user?.upazila || "",
             bloodGroup: session?.user?.bloodGroup || ""
         });
+        setImageFile(null);
         setIsEditing(true);
     };
 
     const filteredUpazilas = useMemo(() => {
         const targetDistrict = isEditing ? formData.district : session?.user?.district;
-        const districtId = districts.find(d => d.name === targetDistrict)?.id;
-        if (!districtId) return [];
-        return allUpazilas.filter(u => u.district_id === districtId);
+        if (!targetDistrict) return [];
+        const district = districts.find(d => d.name === targetDistrict);
+        if (!district) return [];
+        return allUpazilas.filter(u => u.district_id === district.id);
     }, [formData.district, session?.user?.district, isEditing]);
 
     const handleInputChange = (e) => {
@@ -71,19 +80,45 @@ export default function ProfilePage() {
     };
 
     const handleSelectChange = (name, value) => {
-        const selectedValue = Array.from(value)[0] || "";
+        const selectedValue = value instanceof Set ? Array.from(value)[0] : (Array.isArray(value) ? value[0] : value);
+        const finalValue = selectedValue?.toString() || "";
+
         setFormData(prev => {
-            const newData = { ...prev, [name]: selectedValue };
+            const newData = { ...prev, [name]: finalValue };
             if (name === "district") newData.upazila = "";
             return newData;
         });
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        // Here you would normally send formData to your API
-        toast.success("Profile changes saved to temporary state!");
-        setIsEditing(false);
+        setIsSaving(true);
+
+        try {
+            let currentFormData = { ...formData };
+
+            if (imageFile) {
+                const uploadedUrl = await uploadImage(imageFile);
+                if (uploadedUrl) {
+                    currentFormData.image = uploadedUrl;
+                }
+            }
+
+            const result = await profileUpdate(currentFormData);
+            if (result.success) {
+                toast.success("Profile changes saved successfully!");
+                setIsEditing(false);
+                // Optionally reload to sync everything, but state update might be enough
+                window.location.reload();
+            } else {
+                toast.error(result.message || "Failed to save profile");
+            }
+        } catch (error) {
+            console.error("Save error:", error);
+            toast.error("An error occurred while saving profile");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const labelClasses = "text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 block ml-1";
@@ -98,7 +133,7 @@ export default function ProfilePage() {
                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                         <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-neutral-100 flex-shrink-0">
                             <img
-                                src={session?.user?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                                src={session?.user?.image || "https://plus.unsplash.com/premium_photo-1677252438411-9a930d7a5168?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
                                 alt="Profile"
                                 className="w-full h-full object-cover"
                             />
@@ -138,11 +173,22 @@ export default function ProfilePage() {
                                     Cancel
                                 </Button>
                                 <Button
+                                    type="submit"
+                                    disabled={isSaving}
                                     className="flex-1 md:flex-none bg-black text-white font-black rounded-2xl px-10 h-12 shadow-2xl"
                                     onClick={handleSave}
-                                    startContent={<FloppyDisk className="size-4" />}
                                 >
-                                    Save Profile
+                                    {isSaving ? (
+                                        <>
+                                            <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FloppyDisk className="size-4" />
+                                            Save Profile
+                                        </>
+                                    )}
                                 </Button>
                             </div>
                         )}
@@ -209,20 +255,39 @@ export default function ProfilePage() {
                                 </Select>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className={labelClasses}>Avatar Source URL</label>
-                                <Input
-                                    name="image"
-                                    variant="bordered"
-                                    isDisabled={!isEditing}
-                                    value={isEditing ? formData.image : (session?.user?.image || "")}
-                                    onChange={handleInputChange}
-                                    classNames={{
-                                        input: "font-mono text-[10px] text-neutral-500",
-                                        inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
-                                    }}
-                                    placeholder="Enter image link"
-                                />
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className={labelClasses}>Avatar Source URL</label>
+                                    <Input
+                                        name="image"
+                                        variant="bordered"
+                                        isDisabled={!isEditing}
+                                        value={isEditing ? formData.image : (session?.user?.image || "")}
+                                        onChange={handleInputChange}
+                                        classNames={{
+                                            input: "font-mono text-[10px] text-neutral-500",
+                                            inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
+                                        }}
+                                        placeholder="Enter image link"
+                                    />
+                                </div>
+
+                                {isEditing && (
+                                    <div className="space-y-2">
+                                        <label className={labelClasses}>Or Upload From PC</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setImageFile(e.target.files[0])}
+                                            className="w-full p-3 rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/30 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-[#991b1b] file:text-white hover:file:bg-black transition-all cursor-pointer"
+                                        />
+                                        {imageFile && (
+                                            <p className="text-[10px] font-bold text-green-600 ml-2">
+                                                Selected: {imageFile.name}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Geography Section */}
@@ -256,7 +321,7 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <label className={labelClasses}>Regional Upazila</label>
                                 <Select
-                                    isDisabled={!isEditing || (isEditing && !formData.district)}
+                                    isDisabled={!isEditing || !formData.district}
                                     placeholder={session?.user?.upazila}
                                     selectedKeys={isEditing ? (formData.upazila ? [formData.upazila] : []) : (session?.user?.upazila ? [session?.user?.upazila] : [])}
                                     onSelectionChange={(keys) => handleSelectChange("upazila", keys)}

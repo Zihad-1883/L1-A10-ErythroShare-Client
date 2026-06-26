@@ -6,6 +6,7 @@ import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
 import { serverMutation } from "@/lib/actions/server";
 import { toast } from "react-toastify";
+import { redirect } from "next/navigation";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
@@ -79,6 +80,7 @@ export default function CreateDonationRequest() {
         } else {
             toast.error("Failed to create donation request");
         }
+        redirect("/dashboard/my-donation-requests");
     };
 
     const inputClasses = "w-full px-5 py-4 border-2 border-neutral-200 bg-white focus:border-[#991b1b] outline-none transition-colors text-neutral-900 placeholder:text-neutral-400 font-bold rounded-xl";

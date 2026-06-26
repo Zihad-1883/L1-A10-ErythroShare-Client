@@ -1,19 +1,38 @@
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 export const serverMutation = async (path, method, data) => {
-    const response = await fetch(`${baseURL}${path}`, {
-        method,
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    return { ...result, success: response.ok };
+    try {
+        const response = await fetch(`${baseURL}${path}`, {
+            method,
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            const result = await response.json();
+            return { ...result, success: response.ok };
+        } else {
+            const text = await response.text();
+            return { success: false, message: response.statusText, status: response.status, detail: text };
+        }
+    } catch (error) {
+        return { success: false, message: error.message };
+    }
 }
 
 export const serverQuery = async (path) => {
     const response = await fetch(`${baseURL}${path}`);
     const result = await response.json();
     return result;
+}
+
+export const profileUpdate = async (data) => {
+    return serverMutation("/dashboard/profile", "PATCH", data)
+}
+
+export const getAllUsers = async () => {
+    return serverQuery("/dashboard/all-users")
 }

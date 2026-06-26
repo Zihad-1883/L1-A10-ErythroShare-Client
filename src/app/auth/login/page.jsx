@@ -24,7 +24,7 @@ const LoginPage = () => {
 
         toast.success("Login successful!");
         // console.log(data);
-        router.push("/");
+        router.push("/dashboard");
     }
 
     return (
