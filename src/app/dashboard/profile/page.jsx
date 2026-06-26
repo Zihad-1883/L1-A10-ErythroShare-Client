@@ -11,11 +11,8 @@ import {
     SelectPopover,
     ListBox,
     ListBoxItem,
-    Avatar,
     Card,
-    CardHeader,
-    CardContent,
-    Chip
+    CardContent
 } from "@heroui/react";
 import {
     Pencil,

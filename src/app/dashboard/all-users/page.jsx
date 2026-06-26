@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { getAllUsers } from "@/lib/actions/server";
+import { getAllUsers, updateStatus, updateRole } from "@/lib/actions/server";
 import {
     Avatar,
     Chip,
@@ -26,7 +26,7 @@ const roleIconMap = {
     volunteer: <ShieldCheck className="size-3 text-green-500" />,
 };
 
-const UserActions = ({ user }) => {
+const UserActions = ({ user, onUpdate }) => {
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -44,11 +44,41 @@ const UserActions = ({ user }) => {
         };
     }, [isOpen]);
 
+    const handleStatusUpdate = async (newStatus) => {
+        try {
+            const result = await updateStatus({ id: user._id, status: newStatus });
+            if (result.success) {
+                toast.success(`User ${newStatus === 'blocked' ? 'blocked' : 'unblocked'} successfully`);
+                setIsOpen(false);
+                if (onUpdate) onUpdate();
+            } else {
+                toast.error(result.message || "Failed to update status");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        }
+    };
+
+    const handleRoleUpdate = async (newRole) => {
+        try {
+            const result = await updateRole({ id: user._id, role: newRole });
+            if (result.success) {
+                toast.success(`User role updated to ${newRole}`);
+                setIsOpen(false);
+                if (onUpdate) onUpdate();
+            } else {
+                toast.error(result.message || "Failed to update role");
+            }
+        } catch (error) {
+            toast.error("An error occurred");
+        }
+    };
+
     return (
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 text-neutral-400 hover:text-[#991b1b] hover:bg-red-50 rounded-full transition-all duration-300 outline-none"
+                className="p-2 text-neutral-400 hover:text-[#991b1b] hover:bg-neutral-100 rounded-full transition-all duration-300 outline-none"
             >
                 <EllipsisVertical className="size-6" />
             </button>
@@ -57,38 +87,56 @@ const UserActions = ({ user }) => {
                 <div
                     className="absolute right-0 mt-2 w-56 bg-white border border-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-2xl py-3 px-2 z-[100] animate-in fade-in zoom-in-95 duration-200"
                 >
-                    <div className="flex flex-col gap-1">
-
+                    <div className="flex flex-col gap-0.5">
+                        {/* Status Toggle */}
                         {user.status === "active" ? (
-                            <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 transition-colors text-left group">
-                                <Ban className="size-4 text-danger" />
-                                <span className="text-[11px] font-black uppercase tracking-widest text-danger">Block User</span>
+                            <button
+                                onClick={() => handleStatusUpdate("blocked")}
+                                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl hover:bg-red-50 transition-colors text-left group outline-none"
+                            >
+                                <Ban className="size-4 text-danger group-hover:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-danger">Block User</span>
                             </button>
                         ) : (
-                            <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-green-50 transition-colors text-left group">
-                                <Check className="size-4 text-success" />
-                                <span className="text-[11px] font-black uppercase tracking-widest text-success">Unblock User</span>
+                            <button
+                                onClick={() => handleStatusUpdate("active")}
+                                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl hover:bg-green-50 transition-colors text-left group outline-none"
+                            >
+                                <Check className="size-4 text-success group-hover:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-success">Unblock User</span>
                             </button>
                         )}
 
-                        {user.role === "donor" && (
-                            <>
-                                <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-50 transition-colors text-left group">
-                                    <ShieldCheck className="size-4 text-green-500" />
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-neutral-800">Make Volunteer</span>
-                                </button>
-                                <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-50 transition-colors text-left group">
-                                    <CrownDiamond className="size-4 text-amber-500" />
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-neutral-800">Make Admin</span>
-                                </button>
-                            </>
+                        <div className="h-px bg-neutral-100 my-1.5 mx-2 opacity-50" />
 
+                        {/* Role Management */}
+                        {user.role !== "admin" && (
+                            <button
+                                onClick={() => handleRoleUpdate("admin")}
+                                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl hover:bg-neutral-50 transition-colors text-left group outline-none"
+                            >
+                                <CrownDiamond className="size-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-800">Make Admin</span>
+                            </button>
                         )}
 
-                        {user.role === "volunteer" && (
-                            <button className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-neutral-50 transition-colors text-left group">
-                                <CrownDiamond className="size-4 text-amber-500" />
-                                <span className="text-[11px] font-black uppercase tracking-widest text-neutral-800">Make Admin</span>
+                        {user.role !== "volunteer" && (
+                            <button
+                                onClick={() => handleRoleUpdate("volunteer")}
+                                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl hover:bg-neutral-50 transition-colors text-left group outline-none"
+                            >
+                                <ShieldCheck className="size-4 text-green-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-800">Make Volunteer</span>
+                            </button>
+                        )}
+
+                        {user.role !== "donor" && (
+                            <button
+                                onClick={() => handleRoleUpdate("donor")}
+                                className="flex items-center gap-3 w-full px-4 py-3.5 rounded-xl hover:bg-neutral-50 transition-colors text-left group outline-none"
+                            >
+                                <Person className="size-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-neutral-800">Make Donor</span>
                             </button>
                         )}
                     </div>
@@ -102,20 +150,24 @@ export default function AllUsersPage() {
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const data = await getAllUsers();
-                setUsers(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-                toast.error("Failed to load users");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchUsers();
+    const fetchUsers = React.useCallback(async () => {
+        try {
+            const data = await getAllUsers();
+            setUsers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            toast.error("Failed to load users");
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchUsers();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchUsers]);
 
     return (
         <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -227,7 +279,7 @@ export default function AllUsersPage() {
                                             </Chip>
                                         </td>
                                         <td className="px-8 py-6 bg-neutral-50/50 group-hover:bg-white border-y border-r border-neutral-100/50 group-hover:border-neutral-200 rounded-r-[2rem] text-right transition-colors shadow-sm group-hover:shadow-md overflow-visible">
-                                            <UserActions user={user} />
+                                            <UserActions user={user} onUpdate={fetchUsers} />
                                         </td>
                                     </tr>
                                 ))

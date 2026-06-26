@@ -29,10 +29,18 @@ export const serverQuery = async (path) => {
     return result;
 }
 
+export const getAllUsers = async () => {
+    return serverQuery("/dashboard/all-users")
+}
+
 export const profileUpdate = async (data) => {
     return serverMutation("/dashboard/profile", "PATCH", data)
 }
 
-export const getAllUsers = async () => {
-    return serverQuery("/dashboard/all-users")
+export const updateStatus = async (data) => {
+    return serverMutation("/dashboard/user-status", "PATCH", data)
+}
+
+export const updateRole = async (data) => {
+    return serverMutation("/dashboard/user-role", "PATCH", data)
 }

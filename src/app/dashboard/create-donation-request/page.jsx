@@ -16,6 +16,12 @@ const allUpazilas = upazilasData[2]?.data || [];
 export default function CreateDonationRequest() {
     const { data: session } = useSession();
     const [selectedDistrict, setSelectedDistrict] = useState("");
+    const toastError = toast.error("You are blocked from creating donation requests")
+
+    if (session?.user?.status === "blocked") {
+        toastError;
+        redirect("/dashboard");
+    }
 
     const [addData, setAddData] = useState({
         recipientName: "",
