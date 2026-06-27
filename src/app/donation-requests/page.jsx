@@ -12,10 +12,8 @@ import {
 } from "@gravity-ui/icons";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import { useSession } from "@/lib/auth-client";
 
 export default function PublicDonationRequestsPage() {
-    const { data: session } = useSession();
     const [requests, setRequests] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filterGroup, setFilterGroup] = useState("all");

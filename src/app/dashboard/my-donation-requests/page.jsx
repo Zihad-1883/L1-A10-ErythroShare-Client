@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { Bars, Clock, MapPin, Person, Pencil, TrashBin, Eye, Xmark, CircleCheck, CircleInfo } from "@gravity-ui/icons";
-import { deleteDonationRequest, serverQuery } from "@/lib/actions/server";
+import { Bars, Clock, MapPin, Person, Pencil, TrashBin, Eye, CircleInfo, Check, Xmark } from "@gravity-ui/icons";
+import { deleteDonationRequest, serverQuery, updateDonationRequest } from "@/lib/actions/server";
 import { toast } from "react-toastify";
 import Link from "next/link";
+import { Tooltip } from "@heroui/react";
 
 export default function MyDonationRequests() {
     const { data: session } = useSession();
@@ -14,21 +15,54 @@ export default function MyDonationRequests() {
     const [requestToDelete, setRequestToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        const loadRequests = async () => {
-            if (session?.user?.email) {
-                try {
-                    const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
-                    setRequests(Array.isArray(data) ? data : []);
-                } catch (error) {
-                    console.error("Error fetching requests:", error);
-                } finally {
-                    setIsLoading(false);
-                }
-            }
+    const loadRequests = React.useCallback(async () => {
+        if (!session?.user?.email) return;
+
+        try {
+            const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
+            setRequests(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error fetching requests:", error);
+        } finally {
+            setIsLoading(false);
         }
-        loadRequests();
     }, [session]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const init = async () => {
+            if (session?.user?.email) {
+                await loadRequests();
+            } else if (session === null) {
+                // Wrap in a microtask/timeout to avoid "synchronous setState in effect"
+                setTimeout(() => {
+                    if (isMounted) setIsLoading(false);
+                }, 0);
+            }
+        };
+
+        init();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [session, loadRequests]);
+
+
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            const result = await updateDonationRequest(id, { status: newStatus });
+            if (result.success) {
+                toast.success(`Request marked as ${newStatus}`);
+                loadRequests();
+            } else {
+                toast.error(result.message || "Failed to update status");
+            }
+        } catch (error) {
+            toast.error("Status update failed");
+        }
+    };
 
     const handleDelete = async () => {
         if (!requestToDelete) return;
@@ -51,7 +85,7 @@ export default function MyDonationRequests() {
         }
     };
 
-    console.log(requests)
+    // console.log(requests)
 
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
@@ -185,31 +219,57 @@ export default function MyDonationRequests() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-6 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Link
-                                                    href={`/dashboard/donation-request-details/${req._id}`}
-                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all text-neutral-400"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="size-4" />
-                                                </Link>
-                                                <Link
-                                                    href={`/dashboard/edit-donation-request/${req._id}`}
-                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all text-neutral-400"
-                                                    title="Edit Request"
-                                                >
-                                                    <Pencil className="size-4" />
-                                                </Link>
-                                                <button
-                                                    onClick={() => {
-                                                        setRequestToDelete(req._id);
-                                                        setIsDeleteModalOpen(true);
-                                                    }}
-                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all text-neutral-400"
-                                                    title="Delete Request"
-                                                >
-                                                    <TrashBin className="size-4" />
-                                                </button>
+                                            <div className="flex justify-end gap-2 isolate">
+                                                {req.status === "inprogress" && (
+                                                    <>
+                                                        <Tooltip content="Mark as Done" showArrow color="success" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                            <button
+                                                                onClick={() => handleStatusChange(req._id, "done")}
+                                                                className="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm outline-none"
+                                                            >
+                                                                <Check className="size-4" />
+                                                            </button>
+                                                        </Tooltip>
+                                                        <Tooltip content="Cancel Request" showArrow color="danger" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                            <button
+                                                                onClick={() => handleStatusChange(req._id, "canceled")}
+                                                                className="p-2.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm outline-none"
+                                                            >
+                                                                <Xmark className="size-4" />
+                                                            </button>
+                                                        </Tooltip>
+                                                    </>
+                                                )}
+
+                                                <Tooltip content="View Details" showArrow size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                    <Link
+                                                        href={`/dashboard/donation-request-details/${req._id}`}
+                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all text-neutral-400 outline-none"
+                                                    >
+                                                        <Eye className="size-4" />
+                                                    </Link>
+                                                </Tooltip>
+
+                                                <Tooltip content="Edit Request" showArrow color="warning" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                    <Link
+                                                        href={`/dashboard/edit-donation-request/${req._id}`}
+                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all text-neutral-400 outline-none"
+                                                    >
+                                                        <Pencil className="size-4" />
+                                                    </Link>
+                                                </Tooltip>
+
+                                                <Tooltip content="Delete Request" showArrow color="danger" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                    <button
+                                                        onClick={() => {
+                                                            setRequestToDelete(req._id);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all text-neutral-400 outline-none"
+                                                    >
+                                                        <TrashBin className="size-4" />
+                                                    </button>
+                                                </Tooltip>
                                             </div>
                                         </td>
                                     </tr>

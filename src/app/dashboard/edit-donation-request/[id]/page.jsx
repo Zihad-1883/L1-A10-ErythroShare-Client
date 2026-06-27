@@ -7,7 +7,7 @@ import districtsData from "@/data/district.json";
 import upazilasData from "@/data/upazila.json";
 import { getDonationRequestById, editDonationRequest } from "@/lib/actions/server";
 import { toast } from "react-toastify";
-import { Droplet, MapPin, Clock, House, Comment, Pencil, ArrowsRotateLeft } from "@gravity-ui/icons";
+import { Pencil, ArrowsRotateLeft } from "@gravity-ui/icons";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const districts = districtsData[2]?.data || [];

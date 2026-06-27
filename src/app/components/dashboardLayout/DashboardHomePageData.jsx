@@ -1,7 +1,7 @@
 import { useSession } from "@/lib/auth-client"
 import React, { useEffect, useState } from "react"
-import { Person, Bars, Bell, Pencil, TrashBin, Eye, Clock, MapPin } from "@gravity-ui/icons";
-import { serverQuery, getAllBloodDonationRequest, getAllUsers } from "@/lib/actions/server";
+import { Person, Bars, Bell, Pencil, TrashBin, Eye, Clock, MapPin, Check, Xmark, CircleInfo } from "@gravity-ui/icons";
+import { serverQuery, getAllBloodDonationRequest, getAllUsers, updateDonationRequest, deleteDonationRequest } from "@/lib/actions/server";
 import {
     Button,
     Chip,
@@ -10,6 +10,9 @@ import {
     TooltipContent
 } from "@heroui/react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+
+
 
 export default function DashboardHomePageData() {
     const { data: session } = useSession();
@@ -17,36 +20,82 @@ export default function DashboardHomePageData() {
     const [requests, setRequests] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [requestToDelete, setRequestToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!session?.user?.email) {
-                setIsLoading(false);
-                return;
-            };
-
-            try {
-                if (role === "donor") {
-                    const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
-                    setRequests(Array.isArray(data) ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3) : []);
-                } else if (role === "admin" || role === "volunteer") {
-                    const data = await getAllBloodDonationRequest();
-                    setRequests(Array.isArray(data) ? data : []);
-                }
-            } catch (error) {
-                console.error("Error fetching dashboard data:", error);
-            } finally {
-                setIsLoading(false);
-            }
+    const fetchData = React.useCallback(async () => {
+        if (!session?.user?.email) {
+            // Avoid synchronous state update
+            setTimeout(() => setIsLoading(false), 0);
+            return;
         };
 
-        if (role) {
-            fetchData();
-        } else if (session === null) {
-            const timer = setTimeout(() => setIsLoading(false), 0);
-            return () => clearTimeout(timer);
+        try {
+            if (role === "donor") {
+                const data = await serverQuery(`/dashboard/my-donation-requests/${session.user.email}`);
+                setRequests(Array.isArray(data) ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3) : []);
+            } else if (role === "admin" || role === "volunteer") {
+                const data = await getAllBloodDonationRequest();
+                setRequests(Array.isArray(data) ? data : []);
+            }
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+        } finally {
+            setIsLoading(false);
         }
-    }, [role, session, session?.user?.email]);
+    }, [role, session]);
+
+    useEffect(() => {
+        let timer;
+        if (role) {
+            // Use setTimeout to ensure state updates happen in the next tick
+            // and avoid "cascading renders" warning.
+            timer = setTimeout(() => {
+                fetchData();
+            }, 0);
+        } else if (session === null) {
+            timer = setTimeout(() => setIsLoading(false), 0);
+        }
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [role, session, fetchData]);
+
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            const result = await updateDonationRequest(id, { status: newStatus });
+            if (result.success) {
+                toast.success(`Request marked as ${newStatus}`);
+                fetchData();
+            } else {
+                toast.error(result.message || "Failed to update status");
+            }
+        } catch (error) {
+            toast.error("Status update failed");
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!requestToDelete) return;
+        setIsDeleting(true);
+        try {
+            const res = await deleteDonationRequest(requestToDelete);
+            if (res.success) {
+                toast.success("Request deleted successfully");
+                setRequests(prev => prev.filter(req => req._id !== requestToDelete));
+                setIsDeleteModalOpen(false);
+            } else {
+                toast.error(res.message || "Failed to delete request");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            toast.error("An unexpected error occurred");
+        } finally {
+            setIsDeleting(false);
+            setRequestToDelete(null);
+        }
+    };
 
     useEffect(() => {
         const fetchAllUsers = async () => {
@@ -183,55 +232,56 @@ export default function DashboardHomePageData() {
                                         </Chip>
                                     </td>
                                     <td className="px-6 py-6 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <Button
-                                                        as={Link}
-                                                        href={`/dashboard/edit-donation-request/${req._id}`}
-                                                        isIconOnly
-                                                        variant="light"
-                                                        size="sm"
-                                                        className="text-neutral-400 hover:text-[#991b1b]"
-                                                    >
-                                                        <Pencil className="size-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
-                                                    Edit Request
-                                                </TooltipContent>
+                                        <div className="flex justify-end gap-2 isolate">
+                                            {req.status === "inprogress" && (
+                                                <>
+                                                    <Tooltip content="Mark as Done" showArrow color="success" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                        <button
+                                                            onClick={() => handleStatusChange(req._id, "done")}
+                                                            className="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm outline-none"
+                                                        >
+                                                            <Check className="size-4" />
+                                                        </button>
+                                                    </Tooltip>
+                                                    <Tooltip content="Cancel Request" showArrow color="danger" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                        <button
+                                                            onClick={() => handleStatusChange(req._id, "canceled")}
+                                                            className="p-2.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm outline-none"
+                                                        >
+                                                            <Xmark className="size-4" />
+                                                        </button>
+                                                    </Tooltip>
+                                                </>
+                                            )}
+
+                                            <Tooltip content="View Details" showArrow size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                <Link
+                                                    href={`/dashboard/donation-request-details/${req._id}`}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all text-neutral-400 outline-none"
+                                                >
+                                                    <Eye className="size-4" />
+                                                </Link>
                                             </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <Button
-                                                        isIconOnly
-                                                        variant="light"
-                                                        size="sm"
-                                                        className="text-neutral-400 hover:text-red-600"
-                                                    >
-                                                        <TrashBin className="size-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
-                                                    Delete
-                                                </TooltipContent>
+
+                                            <Tooltip content="Edit Request" showArrow color="warning" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                <Link
+                                                    href={`/dashboard/edit-donation-request/${req._id}`}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all text-neutral-400 outline-none"
+                                                >
+                                                    <Pencil className="size-4" />
+                                                </Link>
                                             </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                    <Button
-                                                        as={Link}
-                                                        href={`/dashboard/donation-request-details/${req._id}`}
-                                                        isIconOnly
-                                                        variant="light"
-                                                        size="sm"
-                                                        className="text-neutral-400 hover:text-blue-600"
-                                                    >
-                                                        <Eye className="size-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent className="bg-white border text-[10px] font-bold p-2 rounded-lg shadow-xl">
-                                                    View Details
-                                                </TooltipContent>
+
+                                            <Tooltip content="Delete Request" showArrow color="danger" size="sm" className="font-black uppercase text-[10px] tracking-wider">
+                                                <button
+                                                    onClick={() => {
+                                                        setRequestToDelete(req._id);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
+                                                    className="p-2.5 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all text-neutral-400 outline-none"
+                                                >
+                                                    <TrashBin className="size-4" />
+                                                </button>
                                             </Tooltip>
                                         </div>
                                     </td>
@@ -265,6 +315,52 @@ export default function DashboardHomePageData() {
         <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {WelcomeSection}
             {role === "donor" ? (requests.length > 0 ? DonorRecentRequests : null) : AdminStats}
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
+                    <div
+                        className="absolute inset-0 bg-neutral-950/60 animate-in fade-in duration-300"
+                        onClick={() => !isDeleting && setIsDeleteModalOpen(false)}
+                    ></div>
+
+                    <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl border border-neutral-100 animate-in zoom-in-95 duration-300">
+                        <div className="mb-8 text-center">
+                            <div className="size-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mx-auto mb-6">
+                                <CircleInfo className="size-8" />
+                            </div>
+                            <h3 className="text-2xl font-black text-neutral-900 tracking-tight uppercase italic">Confirm Deletion</h3>
+                            <p className="mt-2 text-neutral-500 text-sm font-bold">
+                                This action is permanent. All data associated with this protocol will be purged from the live registry.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                                className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-neutral-100 text-neutral-400 hover:bg-neutral-50 transition-all font-sans"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="flex-1 py-4 bg-neutral-900 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-red-600 transition-all shadow-lg flex items-center justify-center gap-2 font-sans"
+                            >
+                                {isDeleting ? (
+                                    <div className="size-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <>
+                                        <TrashBin className="size-3" />
+                                        Delete Forever
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     )
 }

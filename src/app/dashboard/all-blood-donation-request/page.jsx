@@ -95,24 +95,22 @@ const DonationActions = ({ request, onUpdate }) => {
 
                         <div className="h-px bg-neutral-100 my-1 mx-2" />
 
-                        {request.status !== "done" && (
-                            <button
-                                onClick={() => handleStatusChange("done")}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors text-left group outline-none"
-                            >
-                                <Check className="size-4 text-emerald-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">Mark Done</span>
-                            </button>
-                        )}
-
-                        {request.status !== "canceled" && (
-                            <button
-                                onClick={() => handleStatusChange("canceled")}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 transition-colors text-left group outline-none"
-                            >
-                                <Xmark className="size-4 text-rose-500 group-hover:scale-110 transition-transform" />
-                                <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">Cancel</span>
-                            </button>
+                        {request.status === "inprogress" && (
+                            <>
+                                <button
+                                    onClick={() => handleStatusChange("done")}
+                                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors text-left group outline-none"
+                                >
+                                    <Check className="size-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">Mark Done</span>
+                                </button>
+                                <button
+                                    onClick={() => handleStatusChange("canceled")}
+                                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-rose-50 transition-colors text-left group outline-none"
+                                >
+                                    <Xmark className="size-4 text-rose-500 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">Cancel</span>
+                                </button></>
                         )}
 
                         <div className="h-px bg-neutral-100 my-1 mx-2" />
