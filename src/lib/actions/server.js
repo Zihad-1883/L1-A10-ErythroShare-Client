@@ -1,4 +1,4 @@
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const baseURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
 
 export const serverMutation = async (path, method, data) => {
     try {
