@@ -153,7 +153,7 @@ export default function DashboardHomePageData() {
         </div>
     );
 
-    const DonorRecentRequests = requests.length > 0 && (
+    const DonorRecentRequests = requests.length > 0 ? (
         <div className="space-y-6">
             <div className="flex items-center justify-between px-2">
                 <div className="flex items-center gap-3">
@@ -301,6 +301,20 @@ export default function DashboardHomePageData() {
                     </Button></Link>
             </div>
         </div>
+    ) : (
+        <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-12 shadow-sm flex flex-col items-center gap-4">
+            <div className="size-16 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-200">
+                <Bars className="size-8" />
+            </div>
+            <p className="text-neutral-400 font-bold italic text-lg">
+                You haven&apos;t created any requests yet.
+            </p>
+            <Link href="/dashboard/create-donation-request">
+                <Button className="bg-[#991b1b] text-white font-black px-8 py-6 rounded-2xl hover:bg-black transition-all shadow-xl shadow-red-100 uppercase tracking-widest text-xs mt-2">
+                    Create Your First Request
+                </Button>
+            </Link>
+        </div>
     );
 
     if (isLoading) {
@@ -314,7 +328,7 @@ export default function DashboardHomePageData() {
     return (
         <section className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {WelcomeSection}
-            {role === "donor" ? (requests.length > 0 ? DonorRecentRequests : null) : AdminStats}
+            {role === "donor" ? DonorRecentRequests : AdminStats}
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && (

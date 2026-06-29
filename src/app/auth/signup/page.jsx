@@ -40,20 +40,17 @@ const SignupPage = () => {
             return;
         }
 
-        if (!avatar) {
-            toast.error("Please upload a profile picture.");
-            return;
-        }
-
         setLoading(true);
         try {
-            // 1. Upload Image to ImgBB
-            const imageUrl = await uploadImage(avatar);
-
-            if (!imageUrl) {
-                toast.error("Image upload failed. Please try again.");
-                setLoading(false);
-                return;
+            // 1. Upload Image to ImgBB (optional)
+            let imageUrl = null;
+            if (avatar) {
+                imageUrl = await uploadImage(avatar);
+                if (!imageUrl) {
+                    toast.error("Image upload failed. Please try again.");
+                    setLoading(false);
+                    return;
+                }
             }
 
             // 2. Perform Signup
@@ -122,13 +119,12 @@ const SignupPage = () => {
                         </div>
 
                         <div>
-                            <label className="block text-gray-700 font-bold mb-2 text-sm">Profile Picture (Avatar) <span className="text-red-500">*</span></label>
+                            <label className="block text-gray-700 font-bold mb-2 text-sm">Profile Picture <span className="text-gray-400 font-normal text-xs">(optional)</span></label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => setAvatar(e.target.files[0])}
                                 className="w-full p-3 rounded-xl border border-gray-200 bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-900 hover:file:bg-red-100"
-                                required
                             />
                         </div>
 
