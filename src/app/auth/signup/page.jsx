@@ -57,7 +57,7 @@ const SignupPage = () => {
             const { data, error } = await authClient.signUp.email({
                 name,
                 email,
-                image: imageUrl,
+                image: imageUrl || undefined,
                 bloodGroup,
                 district: selectedDistrict,
                 upazila: selectedUpazila,
