@@ -53,14 +53,18 @@ const Footer = () => {
                     <div>
                         <h4 className="text-white text-[11px] font-black uppercase tracking-[0.3em] mb-10 italic">Platform Nav</h4>
                         <ul className="space-y-4">
-                            {["Home", "Donation Requests", "Search Donors", "Funding"].map((item) => (
-                                <li key={item}>
+                            {[
+                                { label: "Home",              href: "/" },
+                                { label: "Donation Requests", href: "/donation-requests" },
+                                { label: "Search Donors",     href: "/search" },
+                            ].map(({ label, href }) => (
+                                <li key={label}>
                                     <Link 
-                                        href={item === "Home" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`} 
+                                        href={href}
                                         className="text-sm font-bold hover:text-red-500 transition-colors flex items-center gap-2 group"
                                     >
                                         <span className="size-1 bg-neutral-800 rounded-full group-hover:bg-red-500 transition-colors"></span>
-                                        {item}
+                                        {label}
                                     </Link>
                                 </li>
                             ))}

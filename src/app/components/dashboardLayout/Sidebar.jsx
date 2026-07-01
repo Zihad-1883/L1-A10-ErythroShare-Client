@@ -29,8 +29,6 @@ export function Sidebar() {
                 { icon: Person, label: "Profile", link: "/dashboard/profile" },
                 { icon: Person, label: "All Users", link: "/dashboard/all-users" },
                 { icon: Bars, label: "All Requests", link: "/dashboard/all-blood-donation-request" },
-            ],
-            donor: [
                 { icon: Bars, label: "My Requests", link: "/dashboard/my-donation-requests" },
                 { icon: Plus, label: "Create Request", link: "/dashboard/create-donation-request" },
             ],
@@ -40,8 +38,6 @@ export function Sidebar() {
                 { icon: House, label: "Home", link: "/dashboard" },
                 { icon: Person, label: "Profile", link: "/dashboard/profile" },
                 { icon: Bars, label: "All Requests", link: "/dashboard/all-blood-donation-request" },
-            ],
-            donor: [
                 { icon: Bars, label: "My Requests", link: "/dashboard/my-donation-requests" },
                 { icon: Plus, label: "Create Request", link: "/dashboard/create-donation-request" },
             ],
@@ -62,16 +58,14 @@ export function Sidebar() {
             <Link
                 key={item.label}
                 href={item.link}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-                    isActive
-                        ? "bg-red-50 text-[#991b1b]"
-                        : "text-foreground/80 hover:bg-neutral-100 hover:text-[#991b1b]"
-                }`}
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${isActive
+                    ? "bg-red-50 text-[#991b1b]"
+                    : "text-foreground/80 hover:bg-neutral-100 hover:text-[#991b1b]"
+                    }`}
                 onClick={() => setIsOpen(false)}
             >
-                <item.icon className={`size-5 transition-colors ${
-                    isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
-                }`} />
+                <item.icon className={`size-5 transition-colors ${isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
+                    }`} />
                 {item.label}
             </Link>
         );
@@ -90,28 +84,10 @@ export function Sidebar() {
                 </div>
             ) : (
                 <>
-                    {/* Main nav items */}
                     {currentMenu.main?.map((item) => (
                         <NavLink key={item.label} item={item} />
                     ))}
 
-                    {/* Donor Actions section for admin/volunteer */}
-                    {currentMenu.donor && (
-                        <>
-                            <div className="mt-4 mb-2 px-2">
-                                <div className="flex items-center gap-2">
-                                    <div className="h-px flex-1 bg-neutral-100" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-neutral-400">
-                                        Donor Actions
-                                    </span>
-                                    <div className="h-px flex-1 bg-neutral-100" />
-                                </div>
-                            </div>
-                            {currentMenu.donor.map((item) => (
-                                <NavLink key={item.label} item={item} />
-                            ))}
-                        </>
-                    )}
                 </>
             )}
         </nav>

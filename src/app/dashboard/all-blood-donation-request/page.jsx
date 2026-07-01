@@ -11,7 +11,6 @@ import {
     Check,
     Xmark,
     ArrowsRotateLeft,
-    Plus,
     LayoutHeaderCells,
     Pulse
 } from "@gravity-ui/icons";
