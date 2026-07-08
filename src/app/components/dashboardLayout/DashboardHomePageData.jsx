@@ -120,18 +120,18 @@ export default function DashboardHomePageData() {
     };
 
     const WelcomeSection = (
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950 via-[#991b1b] to-red-900 p-8 shadow-[0_20px_50px_rgba(153,27,27,0.3)] md:p-12 border border-red-800/30">
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-white/[0.02] p-8 shadow-2xl md:p-12 border border-white/10 backdrop-blur-2xl">
             <div className="relative z-10 text-white">
-                <span className="inline-block rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-md border border-white/10">
+                <span className="inline-block rounded-full bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-md border border-white/10 text-white/80">
                     Dashboard Overview
                 </span>
-                <h1 className="mt-4 text-4xl font-extrabold md:text-5xl tracking-tight">
-                    Welcome back, <span className="text-red-200">{session?.user?.name}</span>!
+                <h1 className="mt-4 text-4xl font-extrabold md:text-5xl tracking-tight text-white leading-tight">
+                    Welcome back, <span className="text-red-500">{session?.user?.name}</span>!
                 </h1>
-                <p className="mt-2 text-white/70 font-medium">You are logged in as <span className="text-red-300 font-bold uppercase tracking-wider">{role}</span>.</p>
+                <p className="mt-2 text-white/60 font-medium">You are logged in as <span className="text-red-400 font-bold uppercase tracking-wider">{role}</span>.</p>
             </div>
-            <div className="absolute -right-20 -top-20 size-64 rounded-full bg-white/5 blur-3xl"></div>
-            <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-red-800/10 blur-3xl"></div>
+            <div className="absolute -right-20 -top-20 size-80 rounded-full bg-red-950/20 blur-[80px]" />
+            <div className="absolute -bottom-20 -left-20 size-80 rounded-full bg-red-950/10 blur-[80px]" />
         </div>
     );
 

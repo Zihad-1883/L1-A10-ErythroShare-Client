@@ -119,7 +119,7 @@ export function Sidebar() {
     );
 
     return (
-        <div className="flex relative z-50">
+        <div className="flex relative z-40">
             <div className="fixed top-4 left-4 z-50 md:hidden">
                 <Button
                     className="rounded-full shadow-lg bg-white/5 backdrop-blur-md border border-white/10 text-white h-10 w-10 min-w-0 p-0 hover:bg-white/10"
@@ -129,7 +129,7 @@ export function Sidebar() {
                 </Button>
             </div>
 
-            <aside className="hidden h-[calc(100vh-2rem)] w-72 border border-white/10 bg-white/[0.02] backdrop-blur-2xl md:flex md:flex-col shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] rounded-[2rem] sticky top-4 overflow-y-auto">
+            <aside className="hidden h-[calc(100vh-6.5rem)] w-72 border border-white/10 bg-white/[0.02] backdrop-blur-2xl md:flex md:flex-col shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] rounded-[2rem] sticky top-[5.5rem] overflow-y-auto">
                 {navLinks}
                 {userCard}
             </aside>
