@@ -1,4 +1,6 @@
 "use client";
+import Image from "next/image";
+
 
 import React, { useState, useMemo } from "react";
 import { useSession } from "@/lib/auth-client";
@@ -118,32 +120,36 @@ export default function ProfilePage() {
         }
     };
 
-    const labelClasses = "text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-2 block ml-1";
+    const labelClasses = "text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2 block ml-1";
 
     return (
-        <section className="min-h-screen py-8 md:py-12 px-4 bg-[#fafafa] relative overflow-hidden">
-            <div className="absolute top-[-20%] right-[-10%] size-[800px] bg-red-50 rounded-full blur-[150px] opacity-60 pointer-events-none" />
+        <section className="min-h-screen py-8 md:py-12 px-4 relative overflow-hidden bg-transparent">
+            {/* Glow effect */}
+            <div className="absolute top-[-20%] right-[-10%] size-[800px] bg-red-950/10 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="max-w-5xl mx-auto relative z-10">
                 {/* Header Section */}
                 <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
                     <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                        <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-4 border-white shadow-2xl bg-neutral-100 flex-shrink-0">
-                            <img
+                        <div className="relative w-24 h-24 rounded-3xl overflow-hidden border-2 border-white/10 shadow-2xl bg-white/5 flex-shrink-0">
+                            <Image
                                 src={session?.user?.image || "https://plus.unsplash.com/premium_photo-1677252438411-9a930d7a5168?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"}
                                 alt="Profile"
-                                className="w-full h-full object-cover"
+                                className="object-cover"
+                                fill
+                                sizes="96px"
                             />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-black text-neutral-900 tracking-tight">
+                            <h1 className="text-3xl font-black text-white tracking-tight leading-none">
                                 {session?.user?.name || "Getting User Profile..."}
                             </h1>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1">
-                                <span className="bg-[#991b1b]/10 text-[#991b1b] px-2 py-1 rounded-full font-black uppercase text-[9px]">
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
+                                <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1 rounded-full font-black uppercase text-[9px] tracking-widest">
                                     {session?.user?.role}
                                 </span>
-                                <span className="text-xs font-bold text-neutral-400 flex items-center gap-1">
+                                <span className="text-xs font-bold text-white/50 flex items-center gap-1.5 ml-2">
+                                    <MapPin className="size-3 text-red-500" />
                                     {session?.user?.district || "Location pending..."}, {session?.user?.upazila}
                                 </span>
                             </div>
@@ -153,7 +159,7 @@ export default function ProfilePage() {
                     <div className="w-full md:w-auto">
                         {!isEditing ? (
                             <Button
-                                className="w-full md:w-auto bg-[#991b1b] text-white font-black rounded-2xl px-8 h-12 shadow-xl hover:scale-105"
+                                className="w-full md:w-auto bg-red-600 text-white font-black rounded-2xl px-8 h-12 shadow-[0_0_20px_rgba(220,38,38,0.25)] hover:bg-red-500 transition-all uppercase tracking-wider text-xs"
                                 onClick={startEditing}
                                 startContent={<Pencil className="size-4" />}
                             >
@@ -163,7 +169,7 @@ export default function ProfilePage() {
                             <div className="flex gap-3">
                                 <Button
                                     variant="bordered"
-                                    className="flex-1 md:flex-none border-2 font-bold rounded-2xl px-6 h-12"
+                                    className="flex-1 md:flex-none border border-white/10 hover:bg-white/5 font-bold rounded-2xl px-6 h-12 text-white"
                                     onClick={() => setIsEditing(false)}
                                     startContent={<Xmark className="size-4" />}
                                 >
@@ -172,7 +178,7 @@ export default function ProfilePage() {
                                 <Button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="flex-1 md:flex-none bg-black text-white font-black rounded-2xl px-10 h-12 shadow-2xl"
+                                    className="flex-1 md:flex-none bg-red-600 hover:bg-red-500 text-white font-black rounded-2xl px-10 h-12 shadow-[0_0_25px_rgba(220,38,38,0.3)] transition-all uppercase tracking-wider text-xs"
                                     onClick={handleSave}
                                 >
                                     {isSaving ? (
@@ -192,7 +198,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                <Card className={`border-none shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white/80 backdrop-blur-2xl transition-all duration-500 ${isEditing ? "ring-2 ring-[#991b1b]/20" : ""}`}>
+                <Card className={`border border-white/10 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white/[0.02] backdrop-blur-2xl transition-all duration-500 ${isEditing ? "ring-2 ring-red-500/20" : ""}`}>
                     <CardContent className="p-8 md:p-16">
                         <form className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 md:gap-y-10">
                             {/* Personal Details */}
@@ -205,10 +211,10 @@ export default function ProfilePage() {
                                     value={isEditing ? formData.name : (session?.user?.name || "")}
                                     onChange={handleInputChange}
                                     classNames={{
-                                        input: "font-bold text-neutral-800",
-                                        inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
+                                        input: "font-bold text-white placeholder:text-white/20",
+                                        inputWrapper: `border rounded-3xl h-14 transition-all ${isEditing ? "bg-white/5 border-white/20 focus-within:border-red-500/50" : "bg-white/[0.01] border-white/5 text-white/55 cursor-not-allowed"}`
                                     }}
-                                    startContent={<Person className="size-4 text-neutral-400" />}
+                                    startContent={<Person className="size-4 text-white/40" />}
                                 />
                             </div>
 
@@ -218,10 +224,10 @@ export default function ProfilePage() {
                                     isDisabled={true}
                                     value={session?.user?.email || ""}
                                     classNames={{
-                                        input: "font-bold text-neutral-400",
-                                        inputWrapper: "border-2 rounded-3xl h-14 bg-neutral-100/50 border-neutral-100"
+                                        input: "font-bold text-white/40",
+                                        inputWrapper: "border rounded-3xl h-14 bg-white/[0.01] border-white/5"
                                     }}
-                                    startContent={<ShieldCheck className="size-4 text-neutral-300" />}
+                                    startContent={<ShieldCheck className="size-4 text-white/30" />}
                                 />
                             </div>
 
@@ -234,16 +240,16 @@ export default function ProfilePage() {
                                     onSelectionChange={(keys) => handleSelectChange("bloodGroup", keys)}
                                     className="w-full"
                                 >
-                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
+                                    <SelectTrigger className={`border rounded-3xl h-14 px-6 font-bold text-white transition-all ${isEditing ? "bg-white/5 border-white/20 hover:border-white/30 text-white" : "bg-white/[0.01] border-white/5 text-white/55 cursor-not-allowed"}`}>
                                         <div className="flex items-center gap-3">
-                                            <Droplet className="size-4 text-[#991b1b]" />
+                                            <Droplet className="size-4 text-red-500 animate-pulse" />
                                             <SelectValue placeholder="Unknown Group" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 outline-none">
+                                    <SelectPopover className="bg-[#0f0404] border border-white/10 shadow-2xl rounded-3xl mt-2 outline-none">
                                         <ListBox className="p-2 outline-none">
                                             {bloodGroups.map(group => (
-                                                <ListBoxItem key={group} id={group} className="px-5 py-4 rounded-2xl hover:bg-[#991b1b] hover:text-white font-bold transition-all outline-none">
+                                                <ListBoxItem key={group} id={group} className="px-5 py-4 rounded-2xl hover:bg-red-900 hover:text-white text-white font-bold transition-all outline-none">
                                                     {group} Type
                                                 </ListBoxItem>
                                             ))}
@@ -262,8 +268,8 @@ export default function ProfilePage() {
                                         value={isEditing ? formData.image : (session?.user?.image || "")}
                                         onChange={handleInputChange}
                                         classNames={{
-                                            input: "font-mono text-[10px] text-neutral-500",
-                                            inputWrapper: `border-2 rounded-3xl h-14 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`
+                                            input: "font-mono text-[10px] text-white/60",
+                                            inputWrapper: `border rounded-3xl h-14 transition-all ${isEditing ? "bg-white/5 border-white/20 focus-within:border-red-500/50" : "bg-white/[0.01] border-white/5 text-white/55 cursor-not-allowed"}`
                                         }}
                                         placeholder="Enter image link"
                                     />
@@ -276,10 +282,10 @@ export default function ProfilePage() {
                                             type="file"
                                             accept="image/*"
                                             onChange={(e) => setImageFile(e.target.files[0])}
-                                            className="w-full p-3 rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/30 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-[#991b1b] file:text-white hover:file:bg-black transition-all cursor-pointer"
+                                            className="w-full p-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] text-sm text-white/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-red-600 file:text-white hover:file:bg-red-500 transition-all cursor-pointer"
                                         />
                                         {imageFile && (
-                                            <p className="text-[10px] font-bold text-green-600 ml-2">
+                                            <p className="text-[10px] font-bold text-emerald-400 ml-2">
                                                 Selected: {imageFile.name}
                                             </p>
                                         )}
@@ -297,16 +303,16 @@ export default function ProfilePage() {
                                     onSelectionChange={(keys) => handleSelectChange("district", keys)}
                                     className="w-full"
                                 >
-                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
+                                    <SelectTrigger className={`border rounded-3xl h-14 px-6 font-bold text-white transition-all ${isEditing ? "bg-white/5 border-white/20 hover:border-white/30 text-white" : "bg-white/[0.01] border-white/5 text-white/55 cursor-not-allowed"}`}>
                                         <div className="flex items-center gap-3">
-                                            <MapPin className="size-4 text-neutral-400" />
+                                            <MapPin className="size-4 text-white/40" />
                                             <SelectValue placeholder="No District" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
+                                    <SelectPopover className="bg-[#0f0404] border border-white/10 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
                                         <ListBox className="p-2 max-h-64 overflow-y-auto outline-none">
                                             {districts.map(d => (
-                                                <ListBoxItem key={d.name} id={d.name} className="px-5 py-3 rounded-2xl hover:bg-neutral-900 hover:text-white font-bold transition-all outline-none">
+                                                <ListBoxItem key={d.name} id={d.name} className="px-5 py-3 rounded-2xl hover:bg-red-900 hover:text-white text-white font-bold transition-all outline-none">
                                                     {d.name}
                                                 </ListBoxItem>
                                             ))}
@@ -324,16 +330,16 @@ export default function ProfilePage() {
                                     onSelectionChange={(keys) => handleSelectChange("upazila", keys)}
                                     className="w-full"
                                 >
-                                    <SelectTrigger className={`border-2 rounded-3xl h-14 px-6 font-bold text-neutral-800 transition-colors ${isEditing ? "bg-white border-[#991b1b]/30" : "bg-neutral-50/50"}`}>
+                                    <SelectTrigger className={`border rounded-3xl h-14 px-6 font-bold text-white transition-all ${isEditing ? "bg-white/5 border-white/20 hover:border-white/30 text-white" : "bg-white/[0.01] border-white/5 text-white/55 cursor-not-allowed"}`}>
                                         <div className="flex items-center gap-3">
-                                            <MapPin className="size-4 text-neutral-300" />
+                                            <MapPin className="size-4 text-white/30" />
                                             <SelectValue placeholder="No Upazila" />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectPopover className="bg-white/95 backdrop-blur-3xl border border-neutral-100 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
+                                    <SelectPopover className="bg-[#0f0404] border border-white/10 shadow-2xl rounded-3xl mt-2 overflow-hidden outline-none">
                                         <ListBox className="p-2 max-h-64 overflow-y-auto outline-none">
                                             {filteredUpazilas.map(u => (
-                                                <ListBoxItem key={u.name} id={u.name} className="px-5 py-3 rounded-2xl hover:bg-[#991b1b] hover:text-white font-bold transition-all outline-none">
+                                                <ListBoxItem key={u.name} id={u.name} className="px-5 py-3 rounded-2xl hover:bg-red-900 hover:text-white text-white font-bold transition-all outline-none">
                                                     {u.name}
                                                 </ListBoxItem>
                                             ))}
@@ -348,4 +354,3 @@ export default function ProfilePage() {
         </section>
     );
 }
-

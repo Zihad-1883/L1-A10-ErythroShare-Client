@@ -89,18 +89,18 @@ export default function MyDonationRequests() {
 
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
-            case "pending": return "text-amber-600 bg-amber-50 border-amber-100";
-            case "inprogress": return "text-blue-600 bg-blue-50 border-blue-100";
-            case "done": return "text-emerald-600 bg-emerald-50 border-emerald-100";
-            case "canceled": return "text-rose-600 bg-rose-50 border-rose-100";
-            default: return "text-neutral-600 bg-neutral-50 border-neutral-100";
+            case "pending": return "text-amber-400 bg-amber-950/40 border-amber-900/30";
+            case "inprogress": return "text-sky-400 bg-sky-950/40 border-sky-900/30";
+            case "done": return "text-emerald-400 bg-emerald-950/40 border-emerald-900/30";
+            case "canceled": return "text-rose-400 bg-rose-950/40 border-rose-900/30";
+            default: return "text-white/60 bg-white/5 border-white/10";
         }
     };
 
     if (isLoading) {
         return (
             <div className="flex h-[60vh] items-center justify-center">
-                <div className="size-12 animate-spin rounded-full border-4 border-red-600 border-t-transparent"></div>
+                <div className="size-12 animate-spin rounded-full border-4 border-white/10 border-t-red-650"></div>
             </div>
         );
     }
@@ -108,36 +108,36 @@ export default function MyDonationRequests() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header Section */}
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#991b1b] p-8 shadow-2xl shadow-red-200 md:p-12">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-red-950 via-[#991b1b] to-red-900 p-8 shadow-2xl border border-red-800/30 md:p-12">
                 <div className="relative z-10 text-white">
-                    <span className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
+                    <span className="inline-block rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-md">
                         Personal Records
                     </span>
                     <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">
                         My Donation <span className="text-red-100 tracking-tight">Requests🩸</span>
                     </h1>
-                    <p className="mt-2 text-red-50/80 font-medium">Manage and monitor all your blood donation requests in one place.</p>
+                    <p className="mt-2 text-red-200/80 font-medium">Manage and monitor all your blood donation requests in one place.</p>
                 </div>
-                <div className="absolute -right-20 -top-20 size-64 rounded-full bg-white/10 blur-3xl"></div>
-                <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-red-900/20 blur-3xl"></div>
+                <div className="absolute -right-20 -top-20 size-64 rounded-full bg-white/5 blur-3xl"></div>
+                <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-red-900/10 blur-3xl"></div>
             </div>
 
             {/* Table Section */}
-            <div className="rounded-[2.5rem] border border-neutral-100 bg-white p-6 shadow-sm overflow-hidden">
+            <div className="rounded-[2.5rem] border border-white/10 bg-white/[0.02] p-6 shadow-2xl overflow-hidden">
                 <div className="mb-6 flex items-center justify-between px-2">
                     <div className="flex items-center gap-3">
-                        <div className="bg-red-50 p-2 rounded-xl text-red-600">
+                        <div className="bg-white/5 border border-white/10 p-2 rounded-xl text-red-400">
                             <Bars className="size-5" />
                         </div>
-                        <h2 className="text-xl font-black text-neutral-800 uppercase tracking-tight">Request History</h2>
+                        <h2 className="text-xl font-black text-white uppercase tracking-tight">Request History</h2>
                     </div>
-                    <span className="text-sm font-bold text-neutral-400">Total: {requests.length}</span>
+                    <span className="text-sm font-bold text-white/40">Total: {requests.length}</span>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-xs text-neutral-400 uppercase tracking-[0.2em] border-b border-neutral-50">
+                            <tr className="text-xs text-white/40 uppercase tracking-[0.2em] border-b border-white/5">
                                 <th className="px-6 py-5 font-black">Recipient</th>
                                 <th className="px-6 py-5 font-black">Location</th>
                                 <th className="px-6 py-5 font-black">Date & Time</th>
@@ -146,15 +146,15 @@ export default function MyDonationRequests() {
                                 <th className="px-6 py-5 font-black text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-50">
+                        <tbody className="divide-y divide-white/5">
                             {requests.length === 0 ? (
                                 <tr>
                                     <td colSpan="5" className="px-6 py-24 text-center ">
                                         <div className="flex flex-col items-center gap-4">
-                                            <div className="size-16 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-200">
+                                            <div className="size-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/20">
                                                 <Bars className="size-8" />
                                             </div>
-                                            <p className="text-neutral-400 font-bold italic text-lg">
+                                            <p className="text-white/40 font-bold italic text-lg">
                                                 You haven&apos;t created any requests yet.
                                             </p>
                                         </div>
@@ -162,53 +162,53 @@ export default function MyDonationRequests() {
                                 </tr>
                             ) : (
                                 requests.map((req) => (
-                                    <tr key={req._id} className="group hover:bg-neutral-50 transition-colors">
-                                        <td className="px-6 py-6 font-bold text-neutral-900">
+                                    <tr key={req._id} className="group hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-6 py-6 font-bold text-white">
                                             <div className="flex items-center gap-3">
-                                                <div className="size-10 rounded-full bg-red-50 flex items-center justify-center text-[#991b1b] font-bold text-xs">
+                                                <div className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-red-400 font-bold text-xs shadow-md">
                                                     {req.bloodGroup}
                                                 </div>
                                                 <div>
                                                     <div className="text-sm font-black">{req.recipientName}</div>
-                                                    <div className="text-[10px] text-neutral-400 uppercase tracking-widest">{req.bloodGroup} Group</div>
+                                                    <div className="text-[10px] text-white/40 uppercase tracking-widest">{req.bloodGroup} Group</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 font-medium text-neutral-600">
+                                        <td className="px-6 py-6 font-medium text-white/80">
                                             <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
-                                                    <MapPin className="size-3 text-red-400" />
+                                                <div className="flex items-center gap-2 text-xs font-bold text-white">
+                                                    <MapPin className="size-3 text-red-500" />
                                                     {req.hospitalName}
                                                 </div>
-                                                <div className="text-[10px] text-neutral-400 ml-5">
+                                                <div className="text-[10px] text-white/40 ml-5">
                                                     {req.recipientDistrict}, {req.recipientUpazila}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 font-medium text-neutral-600">
+                                        <td className="px-6 py-6 font-medium text-white/80">
                                             <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-white">
                                                     <Clock className="size-3 text-red-400" />
                                                     {req.donationDate}
                                                 </div>
-                                                <div className="text-[10px] text-neutral-400 ml-5 font-bold">
+                                                <div className="text-[10px] text-white/40 ml-5 font-bold">
                                                     {req.donationTime}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-6 font-medium text-neutral-600">
+                                        <td className="px-6 py-6 font-medium text-white/80">
                                             {req.status?.toLowerCase() === "inprogress" ? (
                                                 <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
-                                                        <Person className="size-3 text-blue-500" />
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                                                        <Person className="size-3 text-[#38bdf8]" />
                                                         {req.donorName || "Assigned"}
                                                     </div>
-                                                    <div className="text-[10px] text-neutral-400 ml-5 italic">
+                                                    <div className="text-[10px] text-white/40 ml-5 italic">
                                                         {req.donorEmail || "N/A"}
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2 text-[10px] text-neutral-300 font-bold uppercase tracking-widest ml-1 opacity-40">
+                                                <div className="flex items-center gap-2 text-[10px] text-white/20 font-bold uppercase tracking-widest ml-1">
                                                     <Person className="size-3" /> None
                                                 </div>
                                             )}
@@ -225,7 +225,7 @@ export default function MyDonationRequests() {
                                                         <Tooltip content="Mark as Done" showArrow color="success" size="sm" className="font-black uppercase text-[10px] tracking-wider">
                                                             <button
                                                                 onClick={() => handleStatusChange(req._id, "done")}
-                                                                className="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm outline-none"
+                                                                className="p-2.5 rounded-xl border border-emerald-990/30 bg-emerald-950/40 text-emerald-450 hover:bg-emerald-600 hover:text-white transition-all shadow-sm outline-none"
                                                             >
                                                                 <Check className="size-4" />
                                                             </button>
@@ -233,7 +233,7 @@ export default function MyDonationRequests() {
                                                         <Tooltip content="Cancel Request" showArrow color="danger" size="sm" className="font-black uppercase text-[10px] tracking-wider">
                                                             <button
                                                                 onClick={() => handleStatusChange(req._id, "canceled")}
-                                                                className="p-2.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm outline-none"
+                                                                className="p-2.5 rounded-xl border border-rose-990/30 bg-rose-955/40 text-rose-450 hover:bg-rose-600 hover:text-white transition-all shadow-sm outline-none"
                                                             >
                                                                 <Xmark className="size-4" />
                                                             </button>
@@ -244,7 +244,7 @@ export default function MyDonationRequests() {
                                                 <Tooltip content="View Details" showArrow size="sm" className="font-black uppercase text-[10px] tracking-wider">
                                                     <Link
                                                         href={`/dashboard/donation-request-details/${req._id}`}
-                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-all text-neutral-400 outline-none"
+                                                        className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:text-white transition-all text-white/60 outline-none"
                                                     >
                                                         <Eye className="size-4" />
                                                     </Link>
@@ -253,7 +253,7 @@ export default function MyDonationRequests() {
                                                 <Tooltip content="Edit Request" showArrow color="warning" size="sm" className="font-black uppercase text-[10px] tracking-wider">
                                                     <Link
                                                         href={`/dashboard/edit-donation-request/${req._id}`}
-                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600 transition-all text-neutral-400 outline-none"
+                                                        className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:text-white transition-all text-white/60 outline-none"
                                                     >
                                                         <Pencil className="size-4" />
                                                     </Link>
@@ -265,7 +265,7 @@ export default function MyDonationRequests() {
                                                             setRequestToDelete(req._id);
                                                             setIsDeleteModalOpen(true);
                                                         }}
-                                                        className="p-2.5 rounded-xl border border-neutral-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all text-neutral-400 outline-none"
+                                                        className="p-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-red-950/40 hover:text-red-400 transition-all text-white/60 outline-none"
                                                     >
                                                         <TrashBin className="size-4" />
                                                     </button>
@@ -284,17 +284,17 @@ export default function MyDonationRequests() {
             {isDeleteModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-sm">
                     <div
-                        className="absolute inset-0 bg-neutral-950/60 animate-in fade-in duration-300"
+                        className="absolute inset-0 bg-[#080202]/85 animate-in fade-in duration-300"
                         onClick={() => !isDeleting && setIsDeleteModalOpen(false)}
                     ></div>
 
-                    <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl border border-neutral-100 animate-in zoom-in-95 duration-300">
+                    <div className="relative w-full max-w-md bg-[#0f0404] rounded-[2.5rem] p-10 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-300 text-white">
                         <div className="mb-8 text-center">
-                            <div className="size-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mx-auto mb-6">
+                            <div className="size-16 bg-red-950/40 border border-red-900/30 rounded-2xl flex items-center justify-center text-red-500 mx-auto mb-6">
                                 <CircleInfo className="size-8" />
                             </div>
-                            <h3 className="text-2xl font-black text-neutral-900 tracking-tight uppercase italic">Confirm Deletion</h3>
-                            <p className="mt-2 text-neutral-500 text-sm font-bold">
+                            <h3 className="text-2xl font-black text-white tracking-tight uppercase italic">Confirm Deletion</h3>
+                            <p className="mt-2 text-white/60 text-sm font-medium">
                                 This action is permanent. All data associated with this protocol will be purged from the live registry.
                             </p>
                         </div>
@@ -303,14 +303,14 @@ export default function MyDonationRequests() {
                             <button
                                 onClick={() => setIsDeleteModalOpen(false)}
                                 disabled={isDeleting}
-                                className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-neutral-100 text-neutral-400 hover:bg-neutral-50 transition-all"
+                                className="flex-1 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10 text-white/70 hover:bg-white/5 transition-all"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={isDeleting}
-                                className="flex-1 py-4 bg-neutral-900 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-red-600 transition-all shadow-lg flex items-center justify-center gap-2"
+                                className="flex-1 py-4 bg-red-950 border border-red-800 rounded-2xl text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-800 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2"
                             >
                                 {isDeleting ? (
                                     <div className="size-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

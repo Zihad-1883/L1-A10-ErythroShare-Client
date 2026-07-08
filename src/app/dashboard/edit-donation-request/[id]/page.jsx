@@ -97,27 +97,27 @@ export default function EditDonationRequest() {
         }
     };
 
-    const inputClasses = "w-full px-6 py-4 bg-neutral-50 border border-neutral-100 rounded-3xl text-neutral-900 font-bold focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-50 outline-none transition-all duration-300 placeholder:text-neutral-300";
-    const labelClasses = "block text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3 ml-4 italic";
+    const inputClasses = "w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold focus:bg-[#0f0404] focus:border-red-600 outline-none transition-all duration-300 placeholder:text-white/20";
+    const labelClasses = "block text-[11px] font-black text-white/50 uppercase tracking-[0.2em] mb-3 ml-4 italic";
 
     if (isLoading) return (
         <div className="flex h-[60vh] items-center justify-center">
-            <div className="size-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="size-12 border-4 border-white/10 border-t-red-650 rounded-full animate-spin"></div>
         </div>
     );
 
     return (
         <div className="container mx-auto px-6 py-12 max-w-5xl">
             <header className="mb-12 relative">
-                <div className="absolute -top-10 -left-10 size-40 bg-red-50 blur-[60px] rounded-full opacity-50"></div>
+                <div className="absolute -top-10 -left-10 size-40 bg-red-950 blur-[60px] rounded-full opacity-50"></div>
                 <div className="relative z-10">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-red-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-950/60 border border-red-800/40 text-red-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
                         <Pencil className="size-3" /> Edit Protocol
                     </div>
-                    <h1 className="text-5xl font-black text-neutral-900 tracking-tighter mb-4 leading-none italic uppercase">
-                        Refine <span className="text-red-600">Donation</span> <br /> Request Parameters
+                    <h1 className="text-5xl font-black text-white tracking-tighter mb-4 leading-none italic uppercase">
+                        Refine <span className="text-red-500">Donation</span> <br /> Request Parameters
                     </h1>
-                    <p className="text-neutral-500 font-bold max-w-xl">Update the information below to ensure potential donors have current and accurate details.</p>
+                    <p className="text-white/60 font-bold max-w-xl">Update the information below to ensure potential donors have current and accurate details.</p>
                 </div>
             </header>
 
@@ -125,8 +125,8 @@ export default function EditDonationRequest() {
                 {/* Main Form Fields */}
                 <div className="lg:col-span-2 space-y-10">
                     {/* Basic Info */}
-                    <div className="bg-white rounded-[3rem] p-10 border border-neutral-100 shadow-sm">
-                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-widest mb-10 pb-4 border-b border-neutral-50">Recipient Specification</h3>
+                    <div className="bg-white/[0.02] rounded-[2.5rem] p-10 border border-white/10 shadow-2xl backdrop-blur-2xl">
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-10 pb-4 border-b border-white/5">Recipient Specification</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="md:col-span-1">
                                 <label className={labelClasses}>Full Identity</label>
@@ -149,16 +149,16 @@ export default function EditDonationRequest() {
                                     onChange={handleInputChange}
                                     className={inputClasses}
                                 >
-                                    <option value="">Select Group</option>
-                                    {bloodGroups.map(group => <option key={group} value={group}>{group}</option>)}
+                                    <option value="" className="bg-[#0f0404] text-white">Select Group</option>
+                                    {bloodGroups.map(group => <option key={group} value={group} className="bg-[#0f0404] text-white">{group}</option>)}
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     {/* Geography */}
-                    <div className="bg-white rounded-[3rem] p-10 border border-neutral-100 shadow-sm">
-                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-widest mb-10 pb-4 border-b border-neutral-50">Geographical Matrix</h3>
+                    <div className="bg-white/[0.02] rounded-[2.5rem] p-10 border border-white/10 shadow-2xl backdrop-blur-2xl">
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-10 pb-4 border-b border-white/5">Geographical Matrix</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                             <div>
                                 <label className={labelClasses}>Administrative District</label>
@@ -168,8 +168,8 @@ export default function EditDonationRequest() {
                                     value={selectedDistrict}
                                     onChange={handleDistrictChange}
                                 >
-                                    <option value="">Select District</option>
-                                    {districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                    <option value="" className="bg-[#0f0404] text-white">Select District</option>
+                                    {districts.map(d => <option key={d.id} value={d.id} className="bg-[#0f0404] text-white">{d.name}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -182,8 +182,8 @@ export default function EditDonationRequest() {
                                     value={formData.recipientUpazila}
                                     onChange={handleUpazilaChange}
                                 >
-                                    <option value="">Select Upazila</option>
-                                    {filteredUpazilas.map(u => <option key={u.id} value={u.name}>{u.name}</option>)}
+                                    <option value="" className="bg-[#0f0404] text-white">Select Upazila</option>
+                                    {filteredUpazilas.map(u => <option key={u.id} value={u.name} className="bg-[#0f0404] text-white">{u.name}</option>)}
                                 </select>
                             </div>
                         </div>
@@ -216,7 +216,7 @@ export default function EditDonationRequest() {
 
                 {/* Sidebar Controls */}
                 <div className="space-y-10">
-                    <div className="bg-neutral-900 rounded-[3rem] p-10 text-white shadow-xl">
+                    <div className="bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-10 text-white shadow-2xl backdrop-blur-2xl">
                         <h3 className="text-xs font-black uppercase tracking-widest mb-10 text-white/40 italic">Temporal Logic</h3>
                         <div className="space-y-8">
                             <div>
@@ -227,7 +227,7 @@ export default function EditDonationRequest() {
                                     type="date"
                                     value={formData.donationDate}
                                     onChange={handleInputChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:border-red-600 outline-none transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:border-red-600 outline-none transition-all duration-300"
                                 />
                             </div>
                             <div>
@@ -238,14 +238,14 @@ export default function EditDonationRequest() {
                                     type="time"
                                     value={formData.donationTime}
                                     onChange={handleInputChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:border-red-600 outline-none transition-all"
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold focus:border-red-600 outline-none transition-all duration-300"
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-[3rem] p-10 border border-neutral-100 shadow-sm">
-                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-widest mb-6 italic">Narrative</h3>
+                    <div className="bg-white/[0.02] rounded-[2.5rem] p-10 border border-white/10 shadow-2xl backdrop-blur-2xl">
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest mb-6 italic">Narrative</h3>
                         <textarea
                             required
                             name="requestedMessage"
@@ -260,7 +260,7 @@ export default function EditDonationRequest() {
                     <button
                         type="submit"
                         disabled={isUpdating}
-                        className="w-full py-8 bg-red-600 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-neutral-900 hover:scale-[1.02] active:scale-95 transition-all duration-500 shadow-2xl shadow-red-100 flex items-center justify-center gap-4"
+                        className="w-full py-6 bg-gradient-to-r from-red-800 to-red-950 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:from-white hover:to-white hover:text-[#080202] hover:scale-[1.01] transition-all duration-300 shadow-2xl border border-red-800/40 flex items-center justify-center gap-4"
                     >
                         {isUpdating ? (
                             <div className="size-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -275,7 +275,7 @@ export default function EditDonationRequest() {
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="w-full py-6 text-neutral-400 font-black text-[10px] uppercase tracking-widest hover:text-neutral-900 transition-colors"
+                        className="w-full py-6 text-white/40 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors"
                     >
                         Cancel Operations
                     </button>

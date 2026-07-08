@@ -89,29 +89,29 @@ export default function CreateDonationRequest() {
         redirect("/dashboard/my-donation-requests");
     };
 
-    const inputClasses = "w-full px-5 py-4 border-2 border-neutral-200 bg-white focus:border-[#991b1b] outline-none transition-colors text-neutral-900 placeholder:text-neutral-400 font-bold rounded-xl";
-    const labelClasses = "block text-sm font-black text-neutral-900 uppercase tracking-wide mb-2";
-    const sectionTitleClasses = "text-2xl font-black text-neutral-900 border-b-4 border-[#991b1b] pb-2 inline-block mb-8";
+    const inputClasses = "w-full px-5 py-4 border border-white/10 bg-white/5 focus:bg-[#0f0404] focus:border-red-600 focus:ring-4 focus:ring-red-950/20 outline-none transition-all duration-300 text-white placeholder:text-white/20 font-bold rounded-2xl";
+    const labelClasses = "block text-xs font-black text-white/50 uppercase tracking-widest mb-2 ml-1";
+    const sectionTitleClasses = "text-lg font-black text-white border-b-2 border-red-800/30 pb-2 inline-block mb-8 uppercase tracking-widest";
 
     return (
-        <section className="min-h-screen bg-white py-12 px-4">
-            <div className="max-w-4xl mx-auto border-2 border-neutral-100 shadow-md rounded-3xl p-8 md:p-12">
-                <header className="mb-12 border-b-2 border-neutral-100 pb-8">
-                    <div className="inline-block bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded mb-4">
+        <section className="py-12 px-4 min-h-screen">
+            <div className="max-w-4xl mx-auto border border-white/10 bg-white/[0.02] backdrop-blur-2xl shadow-2xl rounded-[2.5rem] p-8 md:p-12">
+                <header className="mb-12 border-b border-white/10 pb-8">
+                    <div className="inline-block bg-red-950 border border-red-800/60 text-red-400 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full mb-4">
                         Urgent Request
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black text-neutral-900 mb-4 tracking-tight">
+                    <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight uppercase italic">
                         New Donation Request
                     </h1>
-                    <p className="text-neutral-600 font-bold text-lg">
+                    <p className="text-white/60 font-bold text-lg">
                         Please fill out the form below. Clear information saves lives.
                     </p>
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-12">
                     {/* Requester Profile - Flat Style */}
-                    <div className="bg-neutral-50 p-8 rounded-2xl border border-neutral-200">
-                        <h3 className="text-xs font-black text-neutral-400 uppercase tracking-[0.2em] mb-6">Requester Identification</h3>
+                    <div className="bg-white/[0.01] border border-white/5 p-8 rounded-[2rem]">
+                        <h3 className="text-xs font-black text-white/30 uppercase tracking-[0.2em] mb-6">Requester Identification</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label className={labelClasses}>Requester Name</label>
@@ -119,7 +119,7 @@ export default function CreateDonationRequest() {
                                     readOnly
                                     type="text"
                                     value={session?.user?.name || ""}
-                                    className="w-full px-5 py-4 border-2 border-neutral-300 bg-neutral-100 text-neutral-700 font-bold rounded-xl cursor-not-allowed"
+                                    className="w-full px-5 py-4 border border-white/5 bg-white/[0.01] text-white/30 font-bold rounded-2xl cursor-not-allowed outline-none"
                                 />
                             </div>
                             <div>
@@ -128,7 +128,7 @@ export default function CreateDonationRequest() {
                                     readOnly
                                     type="email"
                                     value={session?.user?.email || ""}
-                                    className="w-full px-5 py-4 border-2 border-neutral-300 bg-neutral-100 text-neutral-700 font-bold rounded-xl cursor-not-allowed"
+                                    className="w-full px-5 py-4 border border-white/5 bg-white/[0.01] text-white/30 font-bold rounded-2xl cursor-not-allowed outline-none"
                                 />
                             </div>
                         </div>
@@ -160,9 +160,9 @@ export default function CreateDonationRequest() {
                                     onChange={handleInputChange}
                                     className={inputClasses}
                                 >
-                                    <option value="">Select Group</option>
+                                    <option value="" className="bg-[#0f0404] text-white">Select Group</option>
                                     {bloodGroups.map(group => (
-                                        <option key={group} value={group}>{group}</option>
+                                        <option key={group} value={group} className="bg-[#0f0404] text-white">{group}</option>
                                     ))}
                                 </select>
                             </div>
@@ -177,9 +177,9 @@ export default function CreateDonationRequest() {
                                     value={selectedDistrict}
                                     onChange={handleDistrictChange}
                                 >
-                                    <option value="">Select District</option>
+                                    <option value="" className="bg-[#0f0404] text-white">Select District</option>
                                     {districts.map(d => (
-                                        <option key={d.id} value={d.id}>{d.name}</option>
+                                        <option key={d.id} value={d.id} className="bg-[#0f0404] text-white">{d.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -188,12 +188,12 @@ export default function CreateDonationRequest() {
                                 <select
                                     required
                                     disabled={!selectedDistrict}
-                                    className={`${inputClasses} disabled:bg-neutral-50 disabled:border-neutral-200`}
+                                    className={`${inputClasses} disabled:opacity-30 disabled:cursor-not-allowed`}
                                     onChange={handleUpazilaChange}
                                 >
-                                    <option value="">Select Upazila</option>
+                                    <option value="" className="bg-[#0f0404] text-white">Select Upazila</option>
                                     {filteredUpazilas.map(u => (
-                                        <option key={u.id} value={u.id}>{u.name}</option>
+                                        <option key={u.id} value={u.id} className="bg-[#0f0404] text-white">{u.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -276,7 +276,7 @@ export default function CreateDonationRequest() {
                     <div className="pt-8">
                         <button
                             type="submit"
-                            className="w-full bg-[#991b1b] hover:bg-black text-white font-black text-xl py-6 rounded-xl transition-colors duration-200"
+                            className="w-full py-5 bg-gradient-to-r from-red-800 to-red-950 text-white font-black text-xl rounded-2xl hover:from-white hover:to-white hover:text-red-950 hover:scale-[1.01] border border-red-750/30 transition-all duration-300 shadow-[0_0_30px_rgba(153,27,27,0.2)]"
                         >
                             Post Donation Request
                         </button>

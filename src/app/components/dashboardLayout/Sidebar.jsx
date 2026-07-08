@@ -58,13 +58,13 @@ export function Sidebar() {
             <Link
                 key={item.label}
                 href={item.link}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${isActive
-                    ? "bg-red-50 text-[#991b1b]"
-                    : "text-foreground/80 hover:bg-neutral-100 hover:text-[#991b1b]"
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all border ${isActive
+                    ? "bg-red-950/40 text-red-400 border-red-900/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                    : "text-white/60 border-transparent hover:bg-white/[0.04] hover:text-white"
                     }`}
                 onClick={() => setIsOpen(false)}
             >
-                <item.icon className={`size-5 transition-colors ${isActive ? "text-[#991b1b]" : "text-muted group-hover:text-[#991b1b]"
+                <item.icon className={`size-5 transition-colors ${isActive ? "text-red-400" : "text-white/40 group-hover:text-red-400"
                     }`} />
                 {item.label}
             </Link>
@@ -72,14 +72,15 @@ export function Sidebar() {
     };
 
     const navLinks = (
-        <nav className="flex flex-col gap-1 p-4 flex-1">
-            <div className="mb-6 px-2 text-xl font-bold text-[#991b1b]">
-                ErythroShare
+        <nav className="flex flex-col gap-1.5 p-4 flex-1">
+            <div className="mb-8 px-2 text-2xl font-black text-white flex items-center gap-2 select-none tracking-tight">
+                <span className="animate-pulse text-red-600 drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]">🩸</span>
+                Erythro<span className="text-red-500">Share</span>
             </div>
             {isPending ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-11 w-full animate-pulse rounded-xl bg-neutral-100/80" />
+                        <div key={i} className="h-11 w-full animate-pulse rounded-xl bg-white/[0.04]" />
                     ))}
                 </div>
             ) : (
@@ -94,22 +95,22 @@ export function Sidebar() {
     );
 
     const userCard = session?.user && (
-        <div className="border-t border-neutral-100 p-4">
-            <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 px-4 py-3">
+        <div className="border-t border-white/10 p-4">
+            <div className="flex items-center gap-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors px-4 py-3">
                 {/* Avatar */}
                 {userImage ? (
-                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-red-100">
+                    <div className="relative size-9 shrink-0 overflow-hidden rounded-full border-2 border-red-500/30">
                         <Image src={userImage} alt={userName} fill className="object-cover" />
                     </div>
                 ) : (
-                    <div className="size-9 shrink-0 rounded-full bg-[#991b1b] flex items-center justify-center text-white font-black text-sm select-none">
+                    <div className="size-9 shrink-0 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white font-black text-sm select-none shadow-[0_0_10px_rgba(239,68,68,0.25)]">
                         {userInitial}
                     </div>
                 )}
                 {/* Info */}
                 <div className="min-w-0 flex-1">
-                    <div className="text-sm font-black text-neutral-800 truncate">{userName}</div>
-                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest truncate">
+                    <div className="text-sm font-bold text-white truncate">{userName}</div>
+                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest truncate">
                         {role}
                     </div>
                 </div>
@@ -118,44 +119,44 @@ export function Sidebar() {
     );
 
     return (
-        <div className="flex">
+        <div className="flex relative z-50">
             <div className="fixed top-4 left-4 z-50 md:hidden">
                 <Button
-                    className="rounded-full shadow-lg bg-white/80 backdrop-blur-md border border-neutral-100 h-10 w-10 min-w-0 p-0"
+                    className="rounded-full shadow-lg bg-white/5 backdrop-blur-md border border-white/10 text-white h-10 w-10 min-w-0 p-0 hover:bg-white/10"
                     onClick={() => setIsOpen(true)}
                 >
-                    <Bars className="size-5 text-[#991b1b]" />
+                    <Bars className="size-5 text-red-500" />
                 </Button>
             </div>
 
-            <aside className="hidden h-screen w-72 border-r border-red-50 bg-white/50 backdrop-blur-xl md:flex md:flex-col shadow-[1px_0_10px_rgba(0,0,0,0.02)] sticky top-0 overflow-y-auto">
+            <aside className="hidden h-[calc(100vh-2rem)] w-72 border border-white/10 bg-white/[0.02] backdrop-blur-2xl md:flex md:flex-col shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] rounded-[2rem] sticky top-4 overflow-y-auto">
                 {navLinks}
                 {userCard}
             </aside>
 
             <Drawer isOpen={isOpen} onOpenChange={setIsOpen}>
-                <Drawer.Backdrop />
-                <Drawer.Content placement="left" className="bg-white/95 backdrop-blur-xl w-[280px] p-0">
+                <Drawer.Backdrop className="bg-black/60 backdrop-blur-sm" />
+                <Drawer.Content placement="left" className="bg-[#0c0303] border-r border-white/10 w-[280px] p-0 text-white">
                     <Drawer.Dialog className="outline-none h-full">
-                        <div className="flex flex-col h-full">
+                        <div className="flex flex-col h-full bg-[#0c0303]">
                             {/* Close Button Area */}
-                            <div className="flex items-center justify-between p-4 border-b border-neutral-100">
-                                <div className="text-xl font-bold text-[#991b1b]">
-                                    ErythroShare
+                            <div className="flex items-center justify-between p-4 border-b border-white/10">
+                                <div className="text-xl font-bold text-white flex items-center gap-2 select-none">
+                                    <span className="text-red-500">🩸</span> ErythroShare
                                 </div>
                                 <Button
                                     isIconOnly
-                                    className="rounded-full bg-neutral-100/50 hover:bg-neutral-100 h-9 w-9 min-w-0"
+                                    className="rounded-full bg-white/5 hover:bg-white/10 text-white h-9 w-9 min-w-0"
                                     variant="light"
                                     onClick={() => setIsOpen(false)}
                                 >
-                                    <Xmark className="size-5 text-neutral-600" />
+                                    <Xmark className="size-5 text-neutral-300" />
                                 </Button>
                             </div>
 
                             {/* Navigation Links */}
                             <div className="flex-1 overflow-y-auto pt-2">
-                                <div className="[&_.mb-6]:hidden">
+                                <div className="[&_.mb-8]:mb-3">
                                     {navLinks}
                                 </div>
                             </div>
