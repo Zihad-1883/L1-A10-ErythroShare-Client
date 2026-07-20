@@ -6,6 +6,9 @@ ErythroShare is an intuitive and user-friendly blood donation application design
 ## 🔗 Live URL
 **Live Web Application:** [https://l1-a10-erythro-share-client.vercel.app]
 
+## Server Repository
+**Server Repo:** [https://github.com/Zihad-1883/L1-A10-ErythroShare-Server]
+
 ## 🌟 Key Features
 - **Authentication:** Secure user and admin authentication using `better-auth`.
 - **User Dashboard:** Dedicated dashboards for users to track donation history and requests.
